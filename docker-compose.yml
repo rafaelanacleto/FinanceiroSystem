@@ -1,0 +1,52 @@
+services:
+  # --- BANCO DE DADOS (SQL Server) ---
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: financeiro-sql
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Rafael.2026!
+    ports:
+      - "1433:1433"
+    networks:
+      - financeiro-net
+
+  # --- IDENTITY PROVIDER (Keycloak) ---
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: financeiro-auth
+    command: start-dev
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=dev-file # Para fins de dev inicial, usa H2. Depois conectamos no SQL.
+    ports:
+      - "8080:8080"
+    networks:
+      - financeiro-net
+
+  # --- CACHE (Redis) ---
+  redis:
+    image: redis:alpine
+    container_name: financeiro-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - financeiro-net
+
+  # --- LOGS (Elasticsearch) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: financeiro-logs
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - financeiro-net
+
+networks:
+  financeiro-net:
+    driver: bridge
