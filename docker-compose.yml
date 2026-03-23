@@ -1,5 +1,4 @@
 services:
-  # --- BANCO DE DADOS (SQL Server) ---
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: financeiro-sql
@@ -11,7 +10,6 @@ services:
     networks:
       - financeiro-net
 
-  # --- IDENTITY PROVIDER (Keycloak) ---
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: financeiro-auth
@@ -19,13 +17,12 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_DB=dev-file # Para fins de dev inicial, usa H2. Depois conectamos no SQL.
+      - KC_DB=dev-file
     ports:
       - "8080:8080"
     networks:
       - financeiro-net
 
-  # --- CACHE (Redis) ---
   redis:
     image: redis:alpine
     container_name: financeiro-cache
@@ -34,7 +31,6 @@ services:
     networks:
       - financeiro-net
 
-  # --- LOGS (Elasticsearch) ---
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     container_name: financeiro-logs
@@ -44,6 +40,18 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
+    networks:
+      - financeiro-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: financeiro-dashboard
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
     networks:
       - financeiro-net
 
