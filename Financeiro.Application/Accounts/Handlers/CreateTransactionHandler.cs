@@ -1,3 +1,4 @@
+using Financeiro.Application.Transactions.Commands;
 using Financeiro.Domain.Entities;
 using Financeiro.Infrastructure.Data;
 using MediatR;
@@ -6,14 +7,6 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
 namespace Financeiro.Application.Transactions.Handlers;
-
-// 1. Definição do Command (pode estar no mesmo arquivo ou em Transactions/Commands)
-public record CreateTransactionCommand(
-    string Description,
-    decimal Amount,
-    DateTime TransactionDate,
-    TransactionType Type,
-    Guid AccountId) : IRequest<Guid>;
 
 // 2. O Handler com lógica de persistência e invalidação de cache
 public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand, Guid>

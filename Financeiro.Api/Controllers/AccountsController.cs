@@ -1,5 +1,6 @@
 using Financeiro.Application.Accounts.Commands;
 using Financeiro.Application.Accounts.Queries;
+using Financeiro.Application.Transactions.Commands;
 using Financeiro.Application.Transactions.Handlers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
