@@ -1,9 +1,10 @@
-using Microsoft.Extensions.Caching.Distributed;
-using Financeiro.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using MediatR;
-using System.Text;
+using Financeiro.Application.Common;
 using Financeiro.Application.Accounts.Queries;
+using Financeiro.Infrastructure.Data;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Globalization;
 
 namespace Financeiro.Application.Accounts.Handlers;
 
@@ -20,13 +21,13 @@ public class GetAccountBalanceHandler : IRequestHandler<GetAccountBalanceQuery, 
 
     public async Task<decimal> Handle(GetAccountBalanceQuery request, CancellationToken cancellationToken)
     {
-        string cacheKey = $"balance_{request.AccountId}";
-        
+        string cacheKey = CacheKeys.AccountBalance(request.AccountId);
+
         // 1. Tenta buscar no Redis
         var cachedBalance = await _cache.GetStringAsync(cacheKey, cancellationToken);
         if (!string.IsNullOrEmpty(cachedBalance))
         {
-            return decimal.Parse(cachedBalance);
+            return decimal.Parse(cachedBalance, CultureInfo.InvariantCulture);
         }
 
         // 2. Se não estiver no cache, calcula do SQL Server
@@ -35,7 +36,7 @@ public class GetAccountBalanceHandler : IRequestHandler<GetAccountBalanceQuery, 
             .SumAsync(t => t.Type == Domain.Entities.TransactionType.Income ? t.Amount : -t.Amount, cancellationToken);
 
         // 3. Salva no Redis por 10 minutos (Cache-Aside)
-        await _cache.SetStringAsync(cacheKey, balance.ToString(), new DistributedCacheEntryOptions
+        await _cache.SetStringAsync(cacheKey, balance.ToString(CultureInfo.InvariantCulture), new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
         }, cancellationToken);

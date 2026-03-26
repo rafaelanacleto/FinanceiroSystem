@@ -1,5 +1,7 @@
+using Financeiro.Application.Common;
 using Financeiro.Application.Transactions.Commands;
 using Financeiro.Domain.Entities;
+using Financeiro.Domain.Exceptions;
 using Financeiro.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +10,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Financeiro.Application.Transactions.Handlers;
 
-// 2. O Handler com lógica de persistência e invalidação de cache
 public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand, Guid>
 {
     private readonly ApplicationDbContext _context;
@@ -24,16 +25,6 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand
 
     public async Task<Guid> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
-        // Validação: A conta existe? 
-        var accountExists = await _context.Accounts
-            .AnyAsync(a => a.Id == request.AccountId, cancellationToken);
-
-        if (!accountExists)
-        {
-            throw new Exception("Conta não encontrada para realizar a transação.");
-        }
-
-        // Criando a entidade de domínio
         var transaction = new Transaction
         {
             Description = request.Description,
@@ -43,18 +34,23 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand
             AccountId = request.AccountId
         };
 
-        // Salvando no SQL Server
         _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync(cancellationToken);
 
-        // --- ESTRATÉGIA DE CACHE (Invalidação) ---
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new NotFoundException($"Conta {request.AccountId} não encontrada para realizar a transação.");
+        }
+
         // Sempre que uma nova transação entra, o saldo no Redis torna-se obsoleto.
         // A próxima Query de saldo será forçada a ler do SQL e atualizar o Redis.
-        string cacheKey = $"balance_{request.AccountId}";
-        await _cache.RemoveAsync(cacheKey, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.AccountBalance(request.AccountId), cancellationToken);
 
-        _logger.LogInformation("Nova transação financeira: {Type} de {Amount} na conta {AccountId}", 
-        request.Type, request.Amount, request.AccountId);
+        _logger.LogInformation("Nova transação financeira: {Type} de {Amount} na conta {AccountId}",
+            request.Type, request.Amount, request.AccountId);
 
         return transaction.Id;
     }

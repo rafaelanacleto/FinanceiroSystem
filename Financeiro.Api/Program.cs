@@ -13,20 +13,19 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .Enrich.WithMachineName()
     .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)
-    .WriteTo.Console() // Para você ver no terminal do dotnet watch
-    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+    .WriteTo.Console()
+    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(builder.Configuration["Elasticsearch:Uri"]!))
     {
         AutoRegisterTemplate = true,
-        IndexFormat = $"financeiro-logs-{DateTime.UtcNow:yyyy-MM}",
-        NumberOfReplicas = 0, // Como é dev node único, não precisa de réplica
+        IndexFormat = "financeiro-logs-{0:yyyy-MM}",
+        NumberOfReplicas = 0,
         NumberOfShards = 2
     })
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
 
-builder.Host.UseSerilog(); // Substitui o logger padrão pelo Serilog
+builder.Host.UseSerilog();
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -42,11 +41,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.Authority = builder.Configuration["Keycloak:BaseUrl"];
         options.Audience = builder.Configuration["Keycloak:ClientId"];
-        options.RequireHttpsMetadata = false; // Apenas para ambiente de DEV
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = false,
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
         };
@@ -59,28 +58,33 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379";
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "Financeiro_";
-});    
+});
 
-// Adicione a referência ao projeto Application
-builder.Services.AddMediatR(cfg => 
+builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Financeiro.Application.Accounts.Commands.CreateAccountCommand).Assembly));
-
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddDefaultPolicy(corsBuilder =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        if (builder.Environment.IsDevelopment())
+        {
+            corsBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        }
+        else
+        {
+            corsBuilder
+                .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }
     });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -97,8 +101,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
