@@ -26,6 +26,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -45,7 +46,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
         };
@@ -84,6 +85,10 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+
+// E logo abaixo de app.UseRouting():
+app.UseCors("DefaultPolicy");
 
 if (app.Environment.IsDevelopment())
 {

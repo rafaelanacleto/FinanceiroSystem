@@ -23,11 +23,27 @@ public class AccountsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id}/balance")]
-    public async Task<IActionResult> GetBalance(Guid id)
+    // [HttpGet("{id}/balance")]
+    // public async Task<IActionResult> GetBalance(Guid id)
+    // {
+    //     var balance = await _mediator.Send(new GetAccountBalanceQuery(id));
+    //     return Ok(new { AccountId = id, Balance = balance });
+    // }
+
+    [HttpGet("balance")] // Removido o {id} da rota
+    [Authorize]
+    public async Task<IActionResult> GetBalance()
     {
-        var balance = await _mediator.Send(new GetAccountBalanceQuery(id));
-        return Ok(new { AccountId = id, Balance = balance });
+        // Pega o Subject (ID) do usuário logado no Token
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim);
+        var balance = await _mediator.Send(new GetAccountBalanceQuery(userId));
+
+        // IMPORTANTE: Verifique se o seu JSON retorna 'amount' ou 'Balance'
+        return Ok(new { amount = balance });
     }
 
     [HttpPost("transactions")]
