@@ -1,29 +1,44 @@
-interface BalanceProps {
-  amount: number;
+import React from 'react';
+
+interface BalanceCardProps {
   label: string;
+  amount: number;
 }
 
-export function BalanceCard({ amount, label }: BalanceProps) {
-  const isNegative = amount < 0;
+export function BalanceCard({ label, amount }: BalanceCardProps) {
+  // 1. Garantia contra valores nulos ou indefinidos (Safety First)
+  const safeAmount = amount ?? 0;
+
+  // 2. Formatador de Moeda Brasileiro
+  const formattedAmount = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(safeAmount);
+
+  // 3. Lógica de cores baseada no valor
+  const isNegative = safeAmount < 0;
+  const amountColorClass = isNegative ? 'text-red-600' : 'text-emerald-600';
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 w-full max-w-sm">
-      <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 min-w-[280px] transition-all hover:shadow-md">
+      {/* Label superior em caixa alta e cinza */}
+      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">
         {label}
       </p>
-      
-      <div className="mt-2 flex items-baseline gap-1">
-        <span className="text-2xl font-bold text-slate-900">R$</span>
-        <span className={`text-4xl font-extrabold tracking-tight ${isNegative ? 'text-red-600' : 'text-emerald-600'}`}>
-          {amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-        </span>
+
+      {/* Valor principal com cor dinâmica */}
+      <div className="flex items-baseline gap-1">
+        <h3 className={`text-3xl font-extrabold tracking-tight ${amountColorClass}`}>
+          {formattedAmount}
+        </h3>
       </div>
 
-      <div className="mt-4 flex items-center text-sm">
-        <span className={isNegative ? 'text-red-500' : 'text-emerald-500'}>
-          {isNegative ? '↓' : '↑'} 12%
-        </span>
-        <span className="ml-2 text-slate-400">em relação ao mês passado</span>
+      {/* Indicador visual simples de status */}
+      <div className="mt-4 flex items-center gap-2">
+        <span className={`flex h-2 w-2 rounded-full ${isNegative ? 'bg-red-400' : 'bg-emerald-400'}`} />
+        <p className="text-slate-400 text-xs font-medium">
+          {isNegative ? 'Atenção ao limite' : 'Saldo disponível'}
+        </p>
       </div>
     </div>
   );

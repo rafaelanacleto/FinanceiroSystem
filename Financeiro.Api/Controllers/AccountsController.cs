@@ -1,4 +1,5 @@
 using Financeiro.Application.Accounts.Commands;
+using Financeiro.Application.Accounts.Handlers;
 using Financeiro.Application.Accounts.Queries;
 using Financeiro.Application.Transactions.Commands;
 using MediatR;
@@ -23,12 +24,6 @@ public class AccountsController : ControllerBase
         return Ok(result);
     }
 
-    // [HttpGet("{id}/balance")]
-    // public async Task<IActionResult> GetBalance(Guid id)
-    // {
-    //     var balance = await _mediator.Send(new GetAccountBalanceQuery(id));
-    //     return Ok(new { AccountId = id, Balance = balance });
-    // }
 
     [HttpGet("balance")] // Removido o {id} da rota
     [Authorize]
@@ -46,10 +41,32 @@ public class AccountsController : ControllerBase
         return Ok(new { amount = balance });
     }
 
+
     [HttpPost("transactions")]
     public async Task<IActionResult> PostTransaction([FromBody] CreateTransactionCommand command)
     {
-        var transactionId = await _mediator.Send(command);
-        return Ok(new { Id = transactionId });
+        // Pega o 'sub' (ID do usuário) do Token JWT
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        // Cria uma nova instância do comando com o ID do usuário
+        var userId = Guid.Parse(userIdClaim);
+        var updatedCommand = command with { AccountId = userId };
+
+        await _mediator.Send(updatedCommand);
+        return Ok();
     }
+
+    // E o GET (que é o que o TransactionList chama) deve estar assim:
+    [HttpGet("transactions")] // <--- Verifique se este atributo está correto!
+    public async Task<IActionResult> GetTransactions()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim);
+        var transactions = await _mediator.Send(new GetAccountTransactionsQuery(userId));
+        return Ok(transactions);
+    }
+
 }
