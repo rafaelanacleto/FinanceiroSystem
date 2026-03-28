@@ -69,4 +69,18 @@ public class AccountsController : ControllerBase
         return Ok(transactions);
     }
 
+
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        // Este novo Query deve retornar o total de entradas e o total de saídas separadamente
+        var summary = await _mediator.Send(new GetAccountSummaryQuery(Guid.Parse(userIdClaim)));
+
+        return Ok(summary);
+    }
+
+
 }
