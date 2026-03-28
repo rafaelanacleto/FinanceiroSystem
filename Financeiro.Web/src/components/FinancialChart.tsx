@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import api from '../services/api';
+import { CATEGORIES } from './NewTransactionModal';
 
 export function FinancialChart() {
   const [data, setData] = useState<any[]>([]);
@@ -9,64 +10,77 @@ export function FinancialChart() {
   async function fetchSummary() {
     try {
       const response = await api.get('/Accounts/summary');
-      const { totalIncome, totalExpenses } = response.data;
-
-      // Formatando para o formato que o Recharts entende
-      const chartData = [
-        { name: 'Receitas', value: totalIncome || 0 },
-        { name: 'Despesas', value: Math.abs(totalExpenses || 0) },
-      ];
+      const raw = response.data.categoryExpenses || [];
+      
+      const chartData = raw.map((item: any) => {
+        const config = CATEGORIES.find(c => c.id === item.category);
+        return {
+          name: item.category,
+          value: Number(item.total),
+          // Mapeamento de cores Tailwind para Hex real
+          color: config ? getColorHex(config.color) : '#94a3b8'
+        };
+      }).filter((i: any) => i.value > 0);
 
       setData(chartData);
     } catch (error) {
-      console.error("Erro ao buscar resumo para o gráfico:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    fetchSummary();
-  }, []);
+  function getColorHex(colorClass: string) {
+    if (colorClass.includes('orange')) return '#f97316';
+    if (colorClass.includes('blue')) return '#3b82f6';
+    if (colorClass.includes('purple')) return '#a855f7';
+    if (colorClass.includes('red')) return '#ef4444';
+    if (colorClass.includes('emerald')) return '#10b981';
+    if (colorClass.includes('indigo')) return '#6366f1';
+    return '#64748b';
+  }
 
-  const COLORS = ['#10b981', '#ef4444']; // Emerald-500 e Red-500 do Tailwind
+  useEffect(() => { fetchSummary(); }, []);
 
-  if (loading) return <div className="h-64 flex items-center justify-center text-slate-400">Calculando proporções...</div>;
-
-  const hasData = data.some(item => item.value > 0);
+  if (loading) return <div className="h-[350px] flex items-center justify-center text-slate-400">Carregando análise...</div>;
 
   return (
-    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-full min-h-[350px]">
-      <h3 className="text-lg font-bold text-slate-800 mb-4">Distribuição de Fluxo</h3>
-      
-      {hasData ? (
-        <ResponsiveContainer width="100%" height={250}>
+    <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm h-full flex flex-col">
+      <div>
+        <h3 className="text-xl font-bold text-slate-800 tracking-tight">Análise de Gastos</h3>
+        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Por Categoria</p>
+      </div>
+
+      <div className="flex-1 min-h-[300px] mt-4">
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={5}
+              cx="50%"
+              cy="50%"
+              innerRadius={70}  // Faz o efeito "Donut" (buraco no meio)
+              outerRadius={100}
+              paddingAngle={8}  // Espaço entre as fatias
               dataKey="value"
-              stroke="none"
+              isAnimationActive={true}
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
               ))}
             </Pie>
             <Tooltip 
+              contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
               formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : value}
-              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
             />
-            <Legend verticalAlign="bottom" height={36} iconType="circle" />
+            <Legend 
+              verticalAlign="bottom" 
+              align="center"
+              iconType="circle"
+              formatter={(value) => <span className="text-slate-600 font-medium text-sm ml-1">{value}</span>}
+            />
           </PieChart>
         </ResponsiveContainer>
-      ) : (
-        <div className="h-64 flex flex-col items-center justify-center text-slate-400 gap-2">
-           <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-2xl">📊</div>
-           <p className="text-sm font-medium">Sem dados para exibir o gráfico</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

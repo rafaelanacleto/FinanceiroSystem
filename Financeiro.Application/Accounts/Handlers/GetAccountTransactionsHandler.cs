@@ -15,6 +15,7 @@ namespace Financeiro.Application.Accounts.Handlers;
 public record TransactionDto(
     Guid Id, 
     string Description, 
+    string Category,
     decimal Amount, 
     int Type, 
     DateTime CreatedAt
@@ -47,6 +48,7 @@ public class GetAccountTransactionsHandler : IRequestHandler<GetAccountTransacti
             .Select(t => new TransactionDto(
                 t.Id,
                 t.Description,
+                t.Category,
                 t.Amount,
                 (int)t.Type, // Converte o Enum do C# para int (0 ou 1) para o React
                 t.CreatedAt

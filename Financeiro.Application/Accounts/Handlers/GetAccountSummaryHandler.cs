@@ -27,6 +27,17 @@ namespace Financeiro.Application.Accounts.Handlers
                 .Where(t => t.AccountId == request.UserId)
                 .ToListAsync(cancellationToken);
 
+            // No Handler, adicione a lógica de agrupamento:
+            var categoryExpenses = transactions
+                .Where(t => t.Type == TransactionType.Expense)
+                .GroupBy(t => t.Category)
+                .Select(g => new CategorySummaryDto(
+                    g.Key,
+                    Math.Abs(g.Sum(t => t.Amount)),
+                    "" // A cor podemos definir no Frontend
+                ))
+                .ToList();
+
             var income = transactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
             var expenses = transactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
 
@@ -34,7 +45,8 @@ namespace Financeiro.Application.Accounts.Handlers
             {
                 TotalIncome = income,
                 TotalExpenses = expenses,
-                Balance = income - expenses
+                Balance = income - expenses,
+                CategoryExpenses = categoryExpenses
             };
         }
     }
@@ -44,5 +56,8 @@ namespace Financeiro.Application.Accounts.Handlers
         public decimal TotalIncome { get; set; }
         public decimal TotalExpenses { get; set; }
         public decimal Balance { get; set; }
+        public List<CategorySummaryDto> CategoryExpenses { get; internal set; }
     }
+
+    public record CategorySummaryDto(string Category, decimal Total, string Color);
 }

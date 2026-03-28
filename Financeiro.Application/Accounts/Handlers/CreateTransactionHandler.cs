@@ -31,7 +31,8 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand
             Amount = request.Amount,
             TransactionDate = request.TransactionDate,
             Type = request.Type,
-            AccountId = request.AccountId
+            AccountId = request.AccountId,
+            Category = request.Category
         };
 
         _context.Transactions.Add(transaction);
