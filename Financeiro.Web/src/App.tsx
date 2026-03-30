@@ -1,102 +1,144 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useKeycloak } from '@react-keycloak/web';
+
+// Importação dos seus Componentes
 import { BalanceCard } from './components/BalanceCard';
-import { NewTransactionModal } from './components/NewTransactionModal';
 import { TransactionList } from './components/TransactionList';
-import { FinancialChart } from './components/FinancialChart'; // NOVO
-import api from './services/api';
-import keycloak from './auth';
+import { FinancialChart } from './components/FinancialChart';
+import { NewTransactionModal } from './components/NewTransactionModal';
+import { DateFilter } from './components/DateFilter';
 
-function App() {
-  const [balance, setBalance] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'dashboard' | 'extrato'>('dashboard');
-  const [userName] = useState(keycloak.tokenParsed?.given_name || "Usuário");
+export function App() {
+  const { keycloak, initialized } = useKeycloak();
 
-  // RefetchKey serve para forçar o gráfico a atualizar quando uma nova transação for criada
-  const [refreshKey, setRefreshKey] = useState(0);
+  // 1. ESTADO GLOBAL DE DATA (Mês e Ano Atual como padrão)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  async function fetchBalance() {
-    try {
-      const response = await api.get('/Accounts/balance');
-      const amount = response.data.amount ?? response.data.balance ?? 0;
-      setBalance(amount);
-      // Sempre que o saldo atualiza, avisamos para os outros componentes recarregarem
-      setRefreshKey(prev => prev + 1);
-    } catch (error) {
-      console.error("Erro ao buscar saldo:", error);
-    } finally {
-      setLoading(false);
-    }
+  // Estado para controlar se o modal está aberto
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Pega o nome do usuário do Keycloak
+  const userName = keycloak?.tokenParsed?.given_name || "Usuário";
+
+  // Função para forçar a atualização de todos os componentes após criar uma transação
+  const handleTransactionCreated = () => {
+    setIsModalOpen(false);
+    // Para atualizar, o React precisa "sentir" uma mudança. 
+    // Como os componentes já escutam selectedMonth/Year, eles vão recarregar 
+    // se você disparar um refresh ou se o componente pai remontar.
+    window.location.reload(); // Forma mais simples de garantir que tudo sincronize
+  };
+
+  if (!initialized) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+      </div>
+    );
   }
 
-  useEffect(() => {
-    fetchBalance();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* HEADER */}
-      <nav className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2 text-emerald-600">
-             <span className="font-black text-2xl">💰</span>
-             <h1 className="text-xl font-bold tracking-tight text-slate-800">Financeiro<span className="text-emerald-600">Pro</span></h1>
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+      {/* Substitua sua <nav> por esta */}
+      <nav className="bg-white border-b border-slate-100 mb-8">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-200">
+                F
+              </div>
+              <span className="text-xl font-black text-slate-800 tracking-tighter">FinanceiroPro</span>
+            </div>
+
+            {/* LINKS DE MENU RESTAURADOS */}
+            <div className="hidden md:flex items-center gap-4">
+              <a href="#" className="text-sm font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl">Dashboard</a>
+              <a href="#" className="text-sm font-bold text-slate-400 hover:text-slate-600 px-4 py-2 transition-colors font-medium">Relatórios</a>
+              <a href="#" className="text-sm font-bold text-slate-400 hover:text-slate-600 px-4 py-2 transition-colors font-medium">Configurações</a>
+            </div>
           </div>
-          <button onClick={() => keycloak.logout()} className="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors">Sair da Conta</button>
+
+          <button
+            onClick={() => keycloak.logout()}
+            className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors"
+          >
+            Sair da conta
+          </button>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-8 py-8">
-        {/* TABS MENU */}
-        <div className="flex gap-8 mb-8 border-b border-slate-200">
-          <button onClick={() => setView('dashboard')} className={`pb-4 text-sm font-bold transition-all ${view === 'dashboard' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>Dashboard</button>
-          <button onClick={() => setView('extrato')} className={`pb-4 text-sm font-bold transition-all ${view === 'extrato' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>Extrato Detalhado</button>
+      <main className="max-w-7xl mx-auto px-6">
+
+        {/* CABEÇALHO COM FILTRO DE DATA */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+          <div>
+            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Olá, {userName}! 👋</h2>
+            <p className="text-slate-500 font-medium mt-1">
+              Gerencie suas finanças de <span className="text-emerald-600 font-bold">Março/2026</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* COMPONENTE DE FILTRO QUE CRIAMOS */}
+            <DateFilter
+              month={selectedMonth}
+              year={selectedYear}
+              onChange={(m, y) => {
+                setSelectedMonth(m);
+                setSelectedYear(y);
+              }}
+            />
+
+            <button
+              onClick={() => setIsModalOpen(true)} // Apenas abre o modal
+              className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
+            >
+              <span className="text-xl">+</span> Nova Transação
+            </button>
+          </div>
         </div>
 
-        {view === 'dashboard' ? (
-          <div className="animate-in fade-in duration-500 space-y-8">
-            <header>
-              <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Olá, {userName}!</h2>
-              <p className="text-slate-500">Veja como estão suas finanças hoje.</p>
-            </header>
+        {/* GRID PRINCIPAL DO DASHBOARD */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            {/* GRID DO DASHBOARD */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              
-              {/* COLUNA ESQUERDA: CARDS E GRÁFICO */}
-              <div className="lg:col-span-8 space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <BalanceCard label="Saldo Total" amount={balance} />
-                  {/* Você pode criar outro BalanceCard para "Gasto do Mês" aqui depois */}
-                </div>
-                
-                {/* O gráfico recebe a refreshKey para atualizar sozinho */}
-                <FinancialChart key={refreshKey} />
-              </div>
+          {/* COLUNA DA ESQUERDA (SALDO E GRÁFICO) */}
+          <div className="lg:col-span-4 space-y-8">
+            <BalanceCard
+              month={selectedMonth}
+              year={selectedYear}
+            />
 
-              {/* COLUNA DIREITA: FORMULÁRIO */}
-              <div className="lg:col-span-4">
-                <NewTransactionModal onTransactionCreated={fetchBalance} />
-                
-                <div className="mt-6 p-6 bg-slate-800 rounded-3xl text-white">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Status da API</p>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                    <p className="text-sm font-medium">Conectado ao SQL Server</p>
-                  </div>
-                </div>
-              </div>
-
+            <div className="h-[400px]">
+              <FinancialChart
+                month={selectedMonth}
+                year={selectedYear}
+              />
             </div>
           </div>
-        ) : (
-          <div className="animate-in fade-in duration-500">
-            <TransactionList />
+
+          {/* COLUNA DA DIREITA (EXTRATO) */}
+          <div className="lg:col-span-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-800 tracking-tight">Extrato Detalhado</h3>
+            </div>
+
+            <TransactionList
+              month={selectedMonth}
+              year={selectedYear}
+            />
           </div>
-        )}
+
+        </div>
       </main>
+
+      {/* MODAL DE CADASTRO */}
+      {isModalOpen && (
+        <NewTransactionModal 
+          onClose={() => setIsModalOpen(false)} 
+          onTransactionCreated={handleTransactionCreated}
+        />
+      )}
     </div>
   );
 }
-
-export default App;

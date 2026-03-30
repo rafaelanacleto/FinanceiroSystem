@@ -2,7 +2,8 @@ import { useState } from 'react';
 import api from '../services/api';
 
 interface NewTransactionModalProps {
-  onTransactionCreated: () => void;
+  onClose: () => void;           // Agora vamos usar essa prop!
+  onTransactionCreated: () => void; 
 }
 
 export const CATEGORIES = [
@@ -16,93 +17,140 @@ export const CATEGORIES = [
   { id: 'Outros', icon: '🏷️', color: 'bg-slate-100 text-slate-600' },
 ];
 
-export function NewTransactionModal({ onTransactionCreated }: NewTransactionModalProps) {
+export function NewTransactionModal({ onClose, onTransactionCreated }: NewTransactionModalProps) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Outros');
-  // 0 = Income (Receita), 1 = Expense (Despesa) - Verifique o seu Enum no C#
   const [type, setType] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      // O objeto enviado deve bater com o seu CreateTransactionCommand no C#
       await api.post('/Accounts/transactions', {
         description,
-        amount: Math.abs(Number(amount)), // Enviamos o valor sempre positivo
-        type: type, // A API decide se soma ou subtrai baseada no Type
-        category: category // Categoria da transação
+        amount: Math.abs(Number(amount)),
+        type: type,
+        category: category
       });
 
-      onTransactionCreated();
-      setDescription('');
-      setAmount('');
-      setCategory('Outros');
+      // Sucesso!
+      onTransactionCreated(); // Isso vai dar o refresh e fechar o modal no App.tsx
     } catch (error) {
       console.error("Erro ao salvar:", error);
       alert("Erro ao salvar transação");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-      <h3 className="text-lg font-bold text-slate-800 mb-4">Novo Lançamento</h3>
-
-      <div className="space-y-4">
-        {/* SELETOR DE TIPO (RADIO BUTTONS ESTILIZADOS) */}
-        <div className="flex gap-4 p-1 bg-slate-100 rounded-xl">
-          <label className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg cursor-pointer transition-all ${type === 0 ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500'}`}>
-            <input type="radio" className="hidden" name="type" value={0} checked={type === 0} onChange={() => setType(0)} />
-            <span className="text-sm font-bold">Receita</span>
-          </label>
-
-          <label className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg cursor-pointer transition-all ${type === 1 ? 'bg-white shadow-sm text-red-600' : 'text-slate-500'}`}>
-            <input type="radio" className="hidden" name="type" value={1} checked={type === 1} onChange={() => setType(1)} />
-            <span className="text-sm font-bold">Despesa</span>
-          </label>
-        </div>
-
-        <input
-          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-          placeholder="Descrição (ex: Salário, Aluguel...)"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          required
-        />
-
-        <input
-          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all font-mono text-lg"
-          placeholder="0,00"
-          type="number"
-          step="0.01"
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-          required
-        />
-
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Categoria</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700"
-          >
-            {CATEGORIES.map(cat => (
-              <option key={cat.id} value={cat.id}>
-                {cat.icon} {cat.id}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          className={`w-full py-3 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 ${type === 0 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' : 'bg-red-600 hover:bg-red-700 shadow-red-200'}`}
+    // CAMADA 1: BACKDROP (Fundo escuro)
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+      onClick={onClose} // Fecha se clicar fora do card branco
+    >
+      
+      {/* CAMADA 2: O CARD DO MODAL */}
+      <div 
+        className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 relative animate-in fade-in zoom-in duration-300"
+        onClick={(e) => e.stopPropagation()} // Impede que o clique dentro do formulário feche o modal
+      >
+        
+        {/* BOTÃO FECHAR (X) */}
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
         >
-          Confirmar {type === 0 ? 'Receita' : 'Despesa'}
+          <span className="text-2xl">✕</span>
         </button>
+
+        <h3 className="text-2xl font-black text-slate-800 mb-6">Novo Lançamento</h3>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* SELETOR DE TIPO */}
+          <div className="flex gap-2 p-1.5 bg-slate-100 rounded-2xl">
+            <button
+              type="button"
+              onClick={() => setType(0)}
+              className={`flex-1 flex items-center justify-center py-3 rounded-xl font-bold transition-all ${type === 0 ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Receita
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setType(1)}
+              className={`flex-1 flex items-center justify-center py-3 rounded-xl font-bold transition-all ${type === 1 ? 'bg-white shadow-sm text-red-600' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Despesa
+            </button>
+          </div>
+
+          {/* INPUTS */}
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Descrição</label>
+              <input
+                className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-slate-700 font-medium"
+                placeholder="Ex: Aluguel, Compra de Março..."
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Valor (R$)</label>
+                <input
+                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all font-bold text-slate-700"
+                  placeholder="0,00"
+                  type="number"
+                  step="0.01"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Categoria</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 cursor-pointer appearance-none"
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.icon} {cat.id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* BOTÃO SALVAR */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-4 rounded-2xl font-black text-lg text-white shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${
+              loading ? 'bg-slate-400 cursor-not-allowed' : 
+              type === 0 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100' : 'bg-red-600 hover:bg-red-700 shadow-red-100'
+            }`}
+          >
+            {loading ? (
+               <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              `Confirmar ${type === 0 ? 'Receita' : 'Despesa'}`
+            )}
+          </button>
+        </form>
       </div>
-    </form>
+    </div>
   );
 }

@@ -71,15 +71,24 @@ public class AccountsController : ControllerBase
 
 
     [HttpGet("summary")]
-    public async Task<IActionResult> GetSummary()
+    public async Task<IActionResult> GetSummary([FromQuery] int month, [FromQuery] int year)
     {
+        // 1. Pega o ID do usuário do Token do Keycloak
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
 
-        // Este novo Query deve retornar o total de entradas e o total de saídas separadamente
-        var summary = await _mediator.Send(new GetAccountSummaryQuery(Guid.Parse(userIdClaim)));
+        // 2. Se o React não enviar mês/ano (opcional), usamos o mês atual como padrão
+        var filterMonth = month == 0 ? DateTime.Now.Month : month;
+        var filterYear = year == 0 ? DateTime.Now.Year : year;
 
-        return Ok(summary);
+        // 3. Envia para o MediatR com os novos campos
+        var result = await _mediator.Send(new GetAccountSummaryQuery(
+            Guid.Parse(userIdClaim),
+            filterMonth,
+            filterYear
+        ));
+
+        return Ok(result);
     }
 
 

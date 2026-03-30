@@ -1,44 +1,51 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
+import api from '../services/api';
 
-interface BalanceCardProps {
-  label: string;
-  amount: number;
+interface BalanceProps {
+  month: number;
+  year: number;
 }
 
-export function BalanceCard({ label, amount }: BalanceCardProps) {
-  // 1. Garantia contra valores nulos ou indefinidos (Safety First)
-  const safeAmount = amount ?? 0;
+export function BalanceCard({ month, year }: BalanceProps) {
+  const [balanceData, setBalanceData] = useState({ totalIncome: 0, totalExpenses: 0, balance: 0 });
+  const [loading, setLoading] = useState(true);
 
-  // 2. Formatador de Moeda Brasileiro
-  const formattedAmount = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(safeAmount);
+  async function fetchBalance() {
+    setLoading(true);
+    try {
+      // Importante: Passar os parâmetros na URL
+      const response = await api.get(`/Accounts/summary?month=${month}&year=${year}`);
+      setBalanceData(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar saldo:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  // 3. Lógica de cores baseada no valor
-  const isNegative = safeAmount < 0;
-  const amountColorClass = isNegative ? 'text-red-600' : 'text-emerald-600';
+  // O pulo do gato: Sempre que month ou year mudarem, ele executa o fetchBalance
+  useEffect(() => {
+    fetchBalance();
+  }, [month, year]);
+
+  if (loading) return <div className="h-32 bg-slate-50 animate-pulse rounded-3xl" />;
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 min-w-[280px] transition-all hover:shadow-md">
-      {/* Label superior em caixa alta e cinza */}
-      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">
-        {label}
-      </p>
-
-      {/* Valor principal com cor dinâmica */}
-      <div className="flex items-baseline gap-1">
-        <h3 className={`text-3xl font-extrabold tracking-tight ${amountColorClass}`}>
-          {formattedAmount}
-        </h3>
-      </div>
-
-      {/* Indicador visual simples de status */}
-      <div className="mt-4 flex items-center gap-2">
-        <span className={`flex h-2 w-2 rounded-full ${isNegative ? 'bg-red-400' : 'bg-emerald-400'}`} />
-        <p className="text-slate-400 text-xs font-medium">
-          {isNegative ? 'Atenção ao limite' : 'Saldo disponível'}
-        </p>
+    <div className="bg-emerald-600 p-8 rounded-[2rem] text-white shadow-xl shadow-emerald-200">
+      <p className="text-emerald-100 font-bold uppercase text-[10px] tracking-widest mb-1">Saldo do Período</p>
+      <h2 className="text-4xl font-black mb-6">
+        {balanceData.balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+      </h2>
+      
+      <div className="flex justify-between border-t border-emerald-500/50 pt-6">
+        <div>
+          <p className="text-emerald-200 text-[10px] font-bold uppercase tracking-tighter">Receitas</p>
+          <p className="font-bold text-lg">+{balanceData.totalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-emerald-200 text-[10px] font-bold uppercase tracking-tighter">Despesas</p>
+          <p className="font-bold text-lg">-{balanceData.totalExpenses.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+        </div>
       </div>
     </div>
   );

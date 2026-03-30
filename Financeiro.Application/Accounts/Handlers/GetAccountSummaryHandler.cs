@@ -23,31 +23,35 @@ namespace Financeiro.Application.Accounts.Handlers
 
         public async Task<AccountSummaryDto> Handle(GetAccountSummaryQuery request, CancellationToken cancellationToken)
         {
-            var transactions = await _context.Transactions
-                .Where(t => t.AccountId == request.UserId)
-                .ToListAsync(cancellationToken);
+            // 1. Filtramos as transações da conta DO MÊS e ANO específicos
+            var transactionsQuery = _context.Transactions
+                .AsNoTracking()
+                .Where(t => t.AccountId == request.AccountId &&
+                            t.CreatedAt.Month == request.Month &&
+                            t.CreatedAt.Year == request.Year);
 
-            // No Handler, adicione a lógica de agrupamento:
+            // 2. Calculamos os totais baseados nessa consulta filtrada
+            var transactions = await transactionsQuery.ToListAsync(cancellationToken);
+
+            var income = transactions
+                .Where(t => t.Type == TransactionType.Income)
+                .Sum(t => t.Amount);
+
+            var expenses = transactions
+                .Where(t => t.Type == TransactionType.Expense)
+                .Sum(t => t.Amount);
+
+            // 3. Agrupamos por categoria para o gráfico de pizza
             var categoryExpenses = transactions
                 .Where(t => t.Type == TransactionType.Expense)
                 .GroupBy(t => t.Category)
                 .Select(g => new CategorySummaryDto(
                     g.Key,
-                    Math.Abs(g.Sum(t => t.Amount)),
-                    "" // A cor podemos definir no Frontend
+                    Math.Abs(g.Sum(x => x.Amount))
                 ))
                 .ToList();
 
-            var income = transactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
-            var expenses = transactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
-
-            return new AccountSummaryDto
-            {
-                TotalIncome = income,
-                TotalExpenses = expenses,
-                Balance = income - expenses,
-                CategoryExpenses = categoryExpenses
-            };
+            return new AccountSummaryDto(income, expenses, categoryExpenses);
         }
     }
 
@@ -57,7 +61,15 @@ namespace Financeiro.Application.Accounts.Handlers
         public decimal TotalExpenses { get; set; }
         public decimal Balance { get; set; }
         public List<CategorySummaryDto> CategoryExpenses { get; internal set; }
+
+        public AccountSummaryDto(decimal totalIncome, decimal totalExpenses, List<CategorySummaryDto> categoryExpenses)
+        {
+            TotalIncome = totalIncome;
+            TotalExpenses = totalExpenses;
+            Balance = totalIncome - totalExpenses;
+            CategoryExpenses = categoryExpenses;
+        }
     }
 
-    public record CategorySummaryDto(string Category, decimal Total, string Color);
+    public record CategorySummaryDto(string Category, decimal Total);
 }

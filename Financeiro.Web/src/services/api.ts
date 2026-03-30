@@ -16,4 +16,15 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Criamos uma função para "dar vida" ao interceptor com a instância real
+export const setupInterceptors = (keycloakInstance: any) => {
+  api.interceptors.request.use((config) => {
+    const token = keycloakInstance.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+};
+
 export default api;

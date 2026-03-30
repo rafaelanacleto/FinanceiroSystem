@@ -3,13 +3,14 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import api from '../services/api';
 import { CATEGORIES } from './NewTransactionModal';
 
-export function FinancialChart() {
+export function FinancialChart({ month, year }: { month: number, year: number }) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
 
   async function fetchSummary() {
     try {
-      const response = await api.get('/Accounts/summary');
+      const response = await api.get(`/Accounts/summary?month=${month}&year=${year}`);
       const raw = response.data.categoryExpenses || [];
       
       const chartData = raw.map((item: any) => {
