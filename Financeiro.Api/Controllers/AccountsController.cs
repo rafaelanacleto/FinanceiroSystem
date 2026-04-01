@@ -45,15 +45,14 @@ public class AccountsController : ControllerBase
     [HttpPost("transactions")]
     public async Task<IActionResult> PostTransaction([FromBody] CreateTransactionCommand command)
     {
-        // Pega o 'sub' (ID do usuário) do Token JWT
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
 
-        // Cria uma nova instância do comando com o ID do usuário
-        var userId = Guid.Parse(userIdClaim);
-        var updatedCommand = command with { AccountId = userId };
+        // Em vez de 'command with { AccountId = userId }', 
+        // o seu Handler deve ser responsável por achar a conta do usuário logado.
+        // Ou, você passa o UserId no comando e o Handler resolve.
 
-        await _mediator.Send(updatedCommand);
+        await _mediator.Send(command);
         return Ok();
     }
 
