@@ -10,7 +10,7 @@ import { setupInterceptors } from './services/api';
 const keycloak = new Keycloak({
   url: 'http://localhost:8080', // URL do seu servidor Keycloak
   realm: 'Financeiro',           // Nome do seu Realm
-  clientId: 'financeiro-api2',    // Nome do seu Client
+  clientId: 'financeiro-api',    // Nome do seu Client
 });
 
 setupInterceptors(keycloak);

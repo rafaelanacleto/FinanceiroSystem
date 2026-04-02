@@ -15,6 +15,15 @@ export const CATEGORIES = [
   { id: 'Salário', icon: '💰', color: 'bg-emerald-100 text-emerald-700' },
   { id: 'Educação', icon: '📚', color: 'bg-indigo-100 text-indigo-700' },
   { id: 'Outros', icon: '🏷️', color: 'bg-slate-100 text-slate-600' },
+  { id: 'Investimentos', icon: '📈', color: 'bg-green-100 text-green-700' },
+  { id: 'Assinaturas', icon: '📅', color: 'bg-yellow-100 text-yellow-700' },
+  { id: 'Presentes', icon: '🎁', color: 'bg-pink-100 text-pink-700' },
+  { id: 'Viagem', icon: '✈️', color: 'bg-cyan-100 text-cyan-700' },
+  { id: 'Pets', icon: '🐶', color: 'bg-rose-100 text-rose-700' },
+  { id: 'Freelance', icon: '🖥️', color: 'bg-violet-100 text-violet-700' },
+  { id: 'Doações', icon: '🙏', color: 'bg-emerald-100 text-emerald-700' },
+  { id: 'Impostos', icon: '🧾', color: 'bg-red-100 text-red-700' },
+  { id: 'Roupas', icon: '👗', color: 'bg-pink-100 text-pink-700' },
 ];
 
 export function NewTransactionModal({ onClose, onTransactionCreated }: NewTransactionModalProps) {

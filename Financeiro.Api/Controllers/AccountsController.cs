@@ -1,5 +1,4 @@
 using Financeiro.Application.Accounts.Commands;
-using Financeiro.Application.Accounts.Handlers;
 using Financeiro.Application.Accounts.Queries;
 using Financeiro.Application.Transactions.Commands;
 using MediatR;
@@ -18,9 +17,12 @@ public class AccountsController : ControllerBase
     public AccountsController(IMediator mediator) => _mediator = mediator;
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateAccountCommand command)
+    public async Task<IActionResult> Create([FromBody] CreateAccountCommand command)
     {
-        var result = await _mediator.Send(command);
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        var result = await _mediator.Send(command with { UserId = Guid.Parse(userIdClaim) });
         return Ok(result);
     }
 
