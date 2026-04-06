@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useKeycloak } from '@react-keycloak/web';
 
 // Importação dos seus Componentes
@@ -8,26 +8,23 @@ import { FinancialChart } from './components/FinancialChart';
 import { NewTransactionModal } from './components/NewTransactionModal';
 import { DateFilter } from './components/DateFilter';
 
+type Page = 'dashboard' | 'relatorios';
+
 export function App() {
   const { keycloak, initialized } = useKeycloak();
 
-  // 1. ESTADO GLOBAL DE DATA (Mês e Ano Atual como padrão)
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-
-  // Estado para controlar se o modal está aberto
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
-  // Pega o nome do usuário do Keycloak
   const userName = keycloak?.tokenParsed?.given_name || "Usuário";
 
-  // Função para forçar a atualização de todos os componentes após criar uma transação
   const handleTransactionCreated = () => {
     setIsModalOpen(false);
-    // Para atualizar, o React precisa "sentir" uma mudança. 
-    // Como os componentes já escutam selectedMonth/Year, eles vão recarregar 
-    // se você disparar um refresh ou se o componente pai remontar.
-    window.location.reload(); // Forma mais simples de garantir que tudo sincronize
+    setEditingTransaction(null);
+    window.location.reload();
   };
 
   if (!initialized) {
@@ -51,11 +48,16 @@ export function App() {
               <span className="text-xl font-black text-slate-800 tracking-tighter">FinanceiroPro</span>
             </div>
 
-            {/* LINKS DE MENU RESTAURADOS */}
             <div className="hidden md:flex items-center gap-4">
-              <a href="#" className="text-sm font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl">Dashboard</a>
-              <a href="#" className="text-sm font-bold text-slate-400 hover:text-slate-600 px-4 py-2 transition-colors font-medium">Relatórios</a>
-              <a href="#" className="text-sm font-bold text-slate-400 hover:text-slate-600 px-4 py-2 transition-colors font-medium">Configurações</a>
+              <button
+                onClick={() => setCurrentPage('dashboard')}
+                className={`text-sm font-bold px-4 py-2 rounded-xl transition-colors ${currentPage === 'dashboard' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+              >Dashboard</button>
+              <button
+                onClick={() => setCurrentPage('relatorios')}
+                className={`text-sm font-bold px-4 py-2 rounded-xl transition-colors ${currentPage === 'relatorios' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+              >Relatórios</button>
+              <a href="#" className="text-sm font-bold text-slate-400 hover:text-slate-600 px-4 py-2 transition-colors">Configurações</a>
             </div>
           </div>
 
@@ -99,43 +101,49 @@ export function App() {
           </div>
         </div>
 
-        {/* GRID PRINCIPAL DO DASHBOARD */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* GRID DO DASHBOARD */}
+        {currentPage === 'dashboard' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-          {/* COLUNA DA ESQUERDA (SALDO E GRÁFICO) */}
-          <div className="lg:col-span-4 space-y-8">
-            <BalanceCard
-              month={selectedMonth}
-              year={selectedYear}
-            />
+            {/* COLUNA DA ESQUERDA (SALDO) */}
+            <div className="lg:col-span-4 space-y-8">
+              <BalanceCard
+                month={selectedMonth}
+                year={selectedYear}
+              />
+            </div>
 
-            <div className="h-[400px]">
+            {/* COLUNA DA DIREITA (GRÁFICO) */}
+            <div className="lg:col-span-8">
               <FinancialChart
                 month={selectedMonth}
                 year={selectedYear}
               />
             </div>
+
           </div>
+        )}
 
-          {/* COLUNA DA DIREITA (EXTRATO) */}
-          <div className="lg:col-span-8">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-800 tracking-tight">Extrato Detalhado</h3>
-            </div>
-
-            <TransactionList
-              month={selectedMonth}
-              year={selectedYear}
-            />
-          </div>
-
-        </div>
+        {/* PÁGINA DE RELATÓRIOS (EXTRATO DETALHADO) */}
+        {currentPage === 'relatorios' && (
+          <TransactionList
+            month={selectedMonth}
+            year={selectedYear}
+            onEdit={(t) => {
+              setEditingTransaction(t);
+              setIsModalOpen(true);
+            }}
+          />
+        )}
       </main>
 
       {/* MODAL DE CADASTRO */}
       {isModalOpen && (
         <NewTransactionModal 
-          onClose={() => setIsModalOpen(false)} 
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingTransaction(null);
+          }} 
           onTransactionCreated={handleTransactionCreated}
         />
       )}

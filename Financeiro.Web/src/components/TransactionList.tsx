@@ -16,6 +16,8 @@ interface ListProps {
 export function TransactionList({ month, year, onEdit }: ListProps) {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   async function fetchTransactions() {
     setLoading(true);
@@ -45,7 +47,14 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
 
   useEffect(() => {
     fetchTransactions();
+    setCurrentPage(1);
   }, [month, year]);
+
+  const totalPages = Math.max(1, Math.ceil(transactions.length / ITEMS_PER_PAGE));
+  const paginatedTransactions = transactions.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   // --- LÓGICA DE EXPORTAÇÃO EXCEL ---
   const exportToExcel = () => {
@@ -67,7 +76,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text(`Extrato Financeiro - ${month}/${year}`, 14, 15);
-    
+
     const tableRows = transactions.map(t => [
       t.description,
       t.category,
@@ -81,7 +90,20 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
       body: tableRows,
       startY: 20,
       theme: 'grid',
-      headStyles: { fillColor: [30, 41, 59] } 
+      headStyles: { fillColor: [30, 41, 59] },
+      didParseCell: function (data) {
+        // Verifica se estamos nas células do corpo da tabela (não no cabeçalho)
+        if (data.section === 'body') {
+          // A coluna 2 é a coluna "Tipo" (0: Descrição, 1: Categoria, 2: Tipo...)
+          const typeValue = data.row.cells[2].text[0];
+
+          if (typeValue === 'Receita') {
+            data.cell.styles.textColor = [22, 163, 74]; // Emerald-600 (Verde)
+          } else if (typeValue === 'Despesa') {
+            data.cell.styles.textColor = [220, 38, 38]; // Red-600 (Vermelho)
+          }
+        }
+      }
     });
 
     doc.save(`Extrato_${month}_${year}.pdf`);
@@ -93,15 +115,15 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     <div className="space-y-4">
       <div className="flex justify-between items-center px-2">
         <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Extrato Detalhado</h3>
-        
+
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={exportToExcel}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-black hover:bg-emerald-100 transition-all border border-emerald-100"
           >
             📊 EXCEL
           </button>
-          <button 
+          <button
             onClick={exportToPDF}
             className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl text-xs font-black hover:bg-red-100 transition-all border border-red-100"
           >
@@ -120,7 +142,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {transactions.map((t) => (
+            {paginatedTransactions.map((t) => (
               <tr key={t.id} className="hover:bg-slate-50/50 transition-all group">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
@@ -146,14 +168,14 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
 
                     {/* Botões (visíveis no hover) */}
                     <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
+                      <button
                         onClick={() => onEdit(t)}
                         className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors shadow-sm"
                         title="Editar"
                       >
                         <span className="text-sm">✏️</span>
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(t.id)}
                         className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors shadow-sm"
                         title="Excluir"
@@ -167,11 +189,48 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
             ))}
           </tbody>
         </table>
-        
+
         {transactions.length === 0 && (
           <div className="py-20 text-center">
             <div className="text-4xl mb-3">📁</div>
             <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">Nenhuma movimentação encontrada</p>
+          </div>
+        )}
+
+        {transactions.length > ITEMS_PER_PAGE && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Página {currentPage} de {totalPages} &mdash; {transactions.length} registros
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded-xl text-xs font-black bg-slate-50 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-slate-100"
+              >
+                ← Anterior
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-9 h-9 rounded-xl text-xs font-black transition-all border ${
+                    page === currentPage
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100 border-slate-100'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded-xl text-xs font-black bg-slate-50 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-slate-100"
+              >
+                Próxima →
+              </button>
+            </div>
           </div>
         )}
       </div>
