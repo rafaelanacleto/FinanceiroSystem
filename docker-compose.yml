@@ -1,14 +1,17 @@
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: financeiro-sql
+  postgres:
+    image: postgres:16
+    container_name: financeiro-db
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Rafael.2026!
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Rafael.2026!
+      - POSTGRES_DB=financeiro
     ports:
-      - "1433:1433"
+      - "5432:5432"
     networks:
       - financeiro-net
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -58,3 +61,6 @@ services:
 networks:
   financeiro-net:
     driver: bridge
+
+volumes:
+  postgres_data:
