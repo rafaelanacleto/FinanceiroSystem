@@ -87,20 +87,32 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     const totalGastos = totalSaidas;
     const balanco = totalEntradas - totalSaidas;
 
+    // Logo do relatório (marca FinanceiroPro)
+    doc.setFillColor(5, 150, 105);
+    doc.roundedRect(14, 10, 12, 12, 3, 3, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(255, 255, 255);
+    doc.text('F', 19.4, 18, { align: 'center' });
+
+    doc.setFontSize(17);
+    doc.setTextColor(15, 23, 42);
+    doc.text('FinanceiroPro', 30, 18);
+
     doc.setFontSize(16);
-    doc.text(`Extrato Financeiro - ${month}/${year}`, 14, 15);
+    doc.text(`Extrato Financeiro - ${month}/${year}`, 14, 31);
 
     doc.setFontSize(11);
-    doc.text(`Total de Gastos: ${formatCurrency(totalGastos)}`, 14, 24);
-    doc.text(`Total de Entradas: ${formatCurrency(totalEntradas)}`, 14, 31);
-    doc.text(`Total de Saídas: ${formatCurrency(totalSaidas)}`, 14, 38);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Total de Gastos: ${formatCurrency(totalGastos)}`, 14, 40);
+    doc.text(`Total de Entradas: ${formatCurrency(totalEntradas)}`, 14, 47);
+    doc.text(`Total de Saídas: ${formatCurrency(totalSaidas)}`, 14, 54);
 
     if (balanco >= 0) {
       doc.setTextColor(22, 163, 74);
     } else {
       doc.setTextColor(220, 38, 38);
     }
-    doc.text(`Balanço: ${formatCurrency(balanco)}`, 14, 45);
+    doc.text(`Balanço: ${formatCurrency(balanco)}`, 14, 61);
     doc.setTextColor(0, 0, 0);
 
     const tableRows = transactions.map(t => [
@@ -114,7 +126,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     autoTable(doc, {
       head: [['Descrição', 'Categoria', 'Tipo', 'Valor', 'Data']],
       body: tableRows,
-      startY: 52,
+      startY: 68,
       theme: 'grid',
       headStyles: { fillColor: [30, 41, 59] },
       didParseCell: function (data) {
