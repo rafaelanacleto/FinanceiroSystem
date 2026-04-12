@@ -1,1 +1,52 @@
 @import "tailwindcss";
+
+html,
+body,
+#root {
+	min-height: 100%;
+}
+
+body {
+	transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark body {
+	background-color: #020617;
+	color: #e2e8f0;
+}
+
+/* Ajustes globais para o modo escuro usando as classes já existentes da interface. */
+html.dark .bg-white {
+	background-color: #0f172a !important;
+}
+
+html.dark .bg-\[\#F8FAFC\] {
+	background-color: #020617 !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/50 {
+	background-color: #1e293b !important;
+}
+
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+	color: #e2e8f0 !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+	color: #94a3b8 !important;
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .divide-slate-50 {
+	border-color: #334155 !important;
+}
+
+html.dark .shadow-slate-200,
+html.dark .shadow-emerald-200 {
+	--tw-shadow-color: rgb(15 23 42 / 0.6) !important;
+}

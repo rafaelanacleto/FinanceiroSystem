@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useKeycloak } from '@react-keycloak/web';
 
 // Importação dos seus Componentes
@@ -8,24 +8,32 @@ import { FinancialChart } from './components/FinancialChart';
 import { NewTransactionModal } from './components/NewTransactionModal';
 import { DateFilter } from './components/DateFilter';
 
-type Page = 'dashboard' | 'relatorios';
+type Page = 'dashboard' | 'relatorios' | 'configuracoes';
+type ThemeMode = 'light' | 'dark';
 
 export function App() {
   const { keycloak, initialized } = useKeycloak();
 
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    const storedTheme = localStorage.getItem('financeiro-theme');
+    return storedTheme === 'dark' ? 'dark' : 'light';
+  });
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
   const userName = keycloak?.tokenParsed?.given_name || "Usuário";
 
   const handleTransactionCreated = () => {
     setIsModalOpen(false);
-    setEditingTransaction(null);
     window.location.reload();
   };
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('financeiro-theme', theme);
+  }, [theme]);
 
   if (!initialized) {
     return (
@@ -57,7 +65,10 @@ export function App() {
                 onClick={() => setCurrentPage('relatorios')}
                 className={`text-sm font-bold px-4 py-2 rounded-xl transition-colors ${currentPage === 'relatorios' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
               >Relatórios</button>
-              <a href="#" className="text-sm font-bold text-slate-400 hover:text-slate-600 px-4 py-2 transition-colors">Configurações</a>
+              <button
+                onClick={() => setCurrentPage('configuracoes')}
+                className={`text-sm font-bold px-4 py-2 rounded-xl transition-colors ${currentPage === 'configuracoes' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+              >Configurações</button>
             </div>
           </div>
 
@@ -73,33 +84,35 @@ export function App() {
       <main className="max-w-7xl mx-auto px-6">
 
         {/* CABEÇALHO COM FILTRO DE DATA */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-          <div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tight">Olá, {userName}! 👋</h2>
-            <p className="text-slate-500 font-medium mt-1">
-              Gerencie suas finanças de <span className="text-emerald-600 font-bold">Março/2026</span>
-            </p>
-          </div>
+        {currentPage !== 'configuracoes' && (
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div>
+              <h2 className="text-4xl font-black text-slate-800 tracking-tight">Olá, {userName}! 👋</h2>
+              <p className="text-slate-500 font-medium mt-1">
+                Gerencie suas finanças de <span className="text-emerald-600 font-bold">Março/2026</span>
+              </p>
+            </div>
 
-          <div className="flex items-center gap-4">
-            {/* COMPONENTE DE FILTRO QUE CRIAMOS */}
-            <DateFilter
-              month={selectedMonth}
-              year={selectedYear}
-              onChange={(m, y) => {
-                setSelectedMonth(m);
-                setSelectedYear(y);
-              }}
-            />
+            <div className="flex items-center gap-4">
+              {/* COMPONENTE DE FILTRO QUE CRIAMOS */}
+              <DateFilter
+                month={selectedMonth}
+                year={selectedYear}
+                onChange={(m, y) => {
+                  setSelectedMonth(m);
+                  setSelectedYear(y);
+                }}
+              />
 
-            <button
-              onClick={() => setIsModalOpen(true)} // Apenas abre o modal
-              className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
-            >
-              <span className="text-xl">+</span> Nova Transação
-            </button>
+              <button
+                onClick={() => setIsModalOpen(true)} // Apenas abre o modal
+                className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
+              >
+                <span className="text-xl">+</span> Nova Transação
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* GRID DO DASHBOARD */}
         {currentPage === 'dashboard' && (
@@ -129,11 +142,52 @@ export function App() {
           <TransactionList
             month={selectedMonth}
             year={selectedYear}
-            onEdit={(t) => {
-              setEditingTransaction(t);
+            onEdit={(_transaction) => {
               setIsModalOpen(true);
             }}
           />
+        )}
+
+        {currentPage === 'configuracoes' && (
+          <section className="max-w-3xl">
+            <div className="mb-6">
+              <h2 className="text-3xl font-black text-slate-800 tracking-tight">Configurações</h2>
+              <p className="text-slate-500 font-medium mt-1">Personalize a aparência do sistema.</p>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8 space-y-6">
+              <div>
+                <h3 className="text-lg font-black text-slate-800">Tema</h3>
+                <p className="text-sm text-slate-500 mt-1">Escolha entre modo claro e modo escuro.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`p-5 rounded-2xl border text-left transition-all ${
+                    theme === 'light'
+                      ? 'border-emerald-300 bg-emerald-50 shadow-sm'
+                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                  }`}
+                >
+                  <p className="text-base font-black text-slate-800">Claro</p>
+                  <p className="text-xs text-slate-500 mt-1">Visual limpo com fundo claro.</p>
+                </button>
+
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`p-5 rounded-2xl border text-left transition-all ${
+                    theme === 'dark'
+                      ? 'border-emerald-500 bg-emerald-950/30 shadow-sm'
+                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                  }`}
+                >
+                  <p className="text-base font-black text-slate-800">Escuro</p>
+                  <p className="text-xs text-slate-500 mt-1">Menos brilho para uso noturno.</p>
+                </button>
+              </div>
+            </div>
+          </section>
         )}
       </main>
 
@@ -142,7 +196,6 @@ export function App() {
         <NewTransactionModal 
           onClose={() => {
             setIsModalOpen(false);
-            setEditingTransaction(null);
           }} 
           onTransactionCreated={handleTransactionCreated}
         />

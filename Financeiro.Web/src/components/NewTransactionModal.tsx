@@ -24,6 +24,18 @@ export const CATEGORIES = [
   { id: 'Doações', icon: '🙏', color: 'bg-emerald-100 text-emerald-700' },
   { id: 'Impostos', icon: '🧾', color: 'bg-red-100 text-red-700' },
   { id: 'Roupas', icon: '👗', color: 'bg-pink-100 text-pink-700' },
+  { id: 'Cuidados Pessoais', icon: '✂️', color: 'bg-teal-100 text-teal-700' },
+  { id: 'Contas Fixas', icon: '⚡', color: 'bg-amber-100 text-amber-700' },
+  { id: 'Empréstimos', icon: '💸', color: 'bg-stone-100 text-stone-700' },
+  { id: 'Seguros', icon: '🛡️', color: 'bg-blue-200 text-blue-800' },
+  { id: 'Manutenção', icon: '🛠️', color: 'bg-gray-200 text-gray-800' },
+  { id: 'Vendas', icon: '🤝', color: 'bg-lime-100 text-lime-700' },
+  { id: 'Internet & Celular', icon: '🌐', color: 'bg-sky-100 text-sky-700' },
+  { id: 'Streaming', icon: '📺', color: 'bg-red-200 text-red-800' },
+  { id: 'Academia', icon: '💪', color: 'bg-orange-200 text-orange-800' },
+  { id: 'Beleza', icon: '💄', color: 'bg-fuchsia-100 text-fuchsia-700' },
+  { id: 'Reembolsos', icon: '🔙', color: 'bg-emerald-200 text-emerald-800' },
+  { id: 'Taxas Bancárias', icon: '🏦', color: 'bg-slate-200 text-slate-800' },
 ];
 
 export function NewTransactionModal({ onClose, onTransactionCreated }: NewTransactionModalProps) {
