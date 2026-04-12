@@ -75,7 +75,33 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
   // --- LÓGICA DE EXPORTAÇÃO PDF ---
   const exportToPDF = () => {
     const doc = new jsPDF();
+    const formatCurrency = (value: number) =>
+      value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    const totalEntradas = transactions
+      .filter(t => t.type === 0)
+      .reduce((acc, t) => acc + Number(t.amount || 0), 0);
+    const totalSaidas = transactions
+      .filter(t => t.type !== 0)
+      .reduce((acc, t) => acc + Number(t.amount || 0), 0);
+    const totalGastos = totalSaidas;
+    const balanco = totalEntradas - totalSaidas;
+
+    doc.setFontSize(16);
     doc.text(`Extrato Financeiro - ${month}/${year}`, 14, 15);
+
+    doc.setFontSize(11);
+    doc.text(`Total de Gastos: ${formatCurrency(totalGastos)}`, 14, 24);
+    doc.text(`Total de Entradas: ${formatCurrency(totalEntradas)}`, 14, 31);
+    doc.text(`Total de Saídas: ${formatCurrency(totalSaidas)}`, 14, 38);
+
+    if (balanco >= 0) {
+      doc.setTextColor(22, 163, 74);
+    } else {
+      doc.setTextColor(220, 38, 38);
+    }
+    doc.text(`Balanço: ${formatCurrency(balanco)}`, 14, 45);
+    doc.setTextColor(0, 0, 0);
 
     const tableRows = transactions.map(t => [
       t.description,
@@ -88,7 +114,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     autoTable(doc, {
       head: [['Descrição', 'Categoria', 'Tipo', 'Valor', 'Data']],
       body: tableRows,
-      startY: 20,
+      startY: 52,
       theme: 'grid',
       headStyles: { fillColor: [30, 41, 59] },
       didParseCell: function (data) {

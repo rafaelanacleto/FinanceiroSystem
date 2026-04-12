@@ -10,7 +10,7 @@ export function DateFilter({ month, year, onChange }: DateFilterProps) {
     "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
   ];
 
-  const years = [2024, 2025, 2026]; 
+  const years = [2023, 2024, 2025, 2026, 2027]; 
 
   return (
     <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
