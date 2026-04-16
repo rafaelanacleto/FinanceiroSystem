@@ -23,11 +23,16 @@ Isso sobe:
 
 | Serviço       | Endereço                  | Descrição                  |
 |---------------|---------------------------|----------------------------|
-| SQL Server    | `localhost:1433`          | Banco de dados principal   |
+| PostgreSQL    | `localhost:5432`          | Banco de dados principal   |
 | Keycloak      | `http://localhost:8080`   | Autenticação / JWT         |
 | Redis         | `localhost:6379`          | Cache distribuído          |
-| Elasticsearch | `http://localhost:9200`   | Armazenamento de logs      |
-| Kibana        | `http://localhost:5601`   | Visualização de logs       |
+| OTel Collector| `localhost:4317` / `4318` | Recepção e roteamento OTLP |
+| Jaeger        | `http://localhost:16686`  | Visualização de traces     |
+| Prometheus    | `http://localhost:9090`   | Coleta e consulta métricas |
+| Grafana       | `http://localhost:3000`   | Dashboards de observabilidade |
+
+Observação: a API está configurada para exportar logs, métricas e traces via OTLP
+para o OpenTelemetry Collector em `http://localhost:4318`.
 
 ---
 

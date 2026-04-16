@@ -34,27 +34,59 @@ services:
     networks:
       - financeiro-net
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
-    container_name: financeiro-logs
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.124.1
+    container_name: financeiro-otel-collector
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
     ports:
-      - "9200:9200"
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    depends_on:
+      - jaeger
     networks:
       - financeiro-net
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.0
-    container_name: financeiro-dashboard
+  jaeger:
+    image: jaegertracing/all-in-one:1.59
+    container_name: financeiro-jaeger
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - COLLECTOR_OTLP_ENABLED=true
     ports:
-      - "5601:5601"
+      - "16686:16686"
+      - "14250:14250"
+      - "14268:14268"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "4319:4317"
+    networks:
+      - financeiro-net
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: financeiro-prometheus
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
     depends_on:
-      - elasticsearch
+      - otel-collector
+    networks:
+      - financeiro-net
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: financeiro-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - jaeger
     networks:
       - financeiro-net
 
