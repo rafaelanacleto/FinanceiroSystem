@@ -35,7 +35,7 @@ services:
       - financeiro-net
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.124.1
+    image: otel/opentelemetry-collector-contrib:0.150.1
     container_name: financeiro-otel-collector
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
     volumes:
