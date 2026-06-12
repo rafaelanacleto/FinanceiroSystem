@@ -5,55 +5,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var otlpEndpoint = builder.Configuration["OpenTelemetry:Otlp:Endpoint"] ?? "http://localhost:4318";
-var serviceName = "Financeiro.Api";
-var serviceVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "1.0.0";
-
-builder.Logging.AddOpenTelemetry(options =>
-{
-    options.IncludeFormattedMessage = true;
-    options.IncludeScopes = true;
-    options.ParseStateValues = true;
-    options.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName, serviceVersion: serviceVersion));
-    options.AddOtlpExporter(otlp =>
-    {
-        otlp.Endpoint = new Uri(otlpEndpoint);
-    });
-});
-
-builder.Services
-    .AddOpenTelemetry()
-    .ConfigureResource(resource => resource.AddService(serviceName, serviceVersion: serviceVersion))
-    .WithTracing(tracing =>
-    {
-        tracing
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddEntityFrameworkCoreInstrumentation()
-            .AddOtlpExporter(otlp =>
-            {
-                otlp.Endpoint = new Uri(otlpEndpoint);
-            });
-    })
-    .WithMetrics(metrics =>
-    {
-        metrics
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddRuntimeInstrumentation()
-            .AddOtlpExporter(otlp =>
-            {
-                otlp.Endpoint = new Uri(otlpEndpoint);
-            });
-    });
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -84,9 +37,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {

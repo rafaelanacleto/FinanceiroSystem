@@ -1,17 +1,17 @@
 services:
-  postgres:
-    image: postgres:16
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: financeiro-db
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=Rafael.2026!
-      - POSTGRES_DB=financeiro
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Rafael.2026!"
+      MSSQL_PID: "Developer"
     ports:
-      - "5432:5432"
+      - "1433:1433"
     networks:
       - financeiro-net
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - sqlserver_data:/var/opt/mssql
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -34,65 +34,9 @@ services:
     networks:
       - financeiro-net
 
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.150.1
-    container_name: financeiro-otel-collector
-    command: ["--config=/etc/otelcol-contrib/config.yaml"]
-    volumes:
-      - ./observability/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
-    ports:
-      - "4317:4317"
-      - "4318:4318"
-      - "8889:8889"
-    depends_on:
-      - jaeger
-    networks:
-      - financeiro-net
-
-  jaeger:
-    image: jaegertracing/all-in-one:1.59
-    container_name: financeiro-jaeger
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
-    ports:
-      - "16686:16686"
-      - "14250:14250"
-      - "14268:14268"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "4319:4317"
-    networks:
-      - financeiro-net
-
-  prometheus:
-    image: prom/prometheus:v2.54.1
-    container_name: financeiro-prometheus
-    volumes:
-      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "9090:9090"
-    depends_on:
-      - otel-collector
-    networks:
-      - financeiro-net
-
-  grafana:
-    image: grafana/grafana:11.2.2
-    container_name: financeiro-grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    ports:
-      - "3000:3000"
-    depends_on:
-      - prometheus
-      - jaeger
-    networks:
-      - financeiro-net
-
 networks:
   financeiro-net:
     driver: bridge
 
 volumes:
-  postgres_data:
+  sqlserver_data:
