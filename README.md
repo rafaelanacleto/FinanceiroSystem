@@ -26,10 +26,27 @@ Isso sobe:
 | SQL Server    | `localhost:1433`          | Banco de dados principal   |
 | Keycloak      | `http://localhost:8080`   | Autenticação / JWT         |
 | Redis         | `localhost:6379`          | Cache distribuído          |
+| API .NET      | `http://localhost:5283`   | Backend financeiro         |
+| Frontend      | `http://localhost:5173`   | Aplicação React            |
 
 ---
 
-## 2. Configurar o Keycloak
+## 2. Serviços e portas
+
+Quando o projeto está rodando localmente ou via Docker Compose, os endpoints ficam assim:
+
+| Aplicação     | Endereço                      | Observação |
+|--------------|-------------------------------|------------|
+| SQL Server   | `localhost:1433`              | Porta do banco no Docker |
+| Keycloak     | `http://localhost:8080`       | UI de administração |
+| Redis        | `localhost:6379`              | Cache no Docker |
+| API .NET     | `http://localhost:5283`       | Backend financeiro |
+| Swagger      | `http://localhost:5283/swagger` | Docs da API |
+| Frontend     | `http://localhost:5173`       | App React |
+
+---
+
+## 3. Configurar o Keycloak
 
 1. Acesse `http://localhost:8080` e faça login com `admin` / `admin`
 2. Crie um **Realm** chamado `Financeiro`
@@ -103,3 +120,5 @@ FinanceiroSystem/
 ├── Financeiro.Web/           # Frontend React + Vite + TailwindCSS
 └── docker-compose.yml        # Infraestrutura local
 ```
+
+docker compose stop

@@ -36,8 +36,8 @@ services:
 
   api:
     build:
-      context: ./Financeiro.Api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Financeiro.Api/Dockerfile
     container_name: financeiro-api
     ports:
       - "5283:5283"

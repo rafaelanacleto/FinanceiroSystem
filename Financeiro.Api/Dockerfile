@@ -1,15 +1,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY ["Financeiro.Api.csproj", "./"]
-COPY ["../Financeiro.Application/Financeiro.Application.csproj", "../Financeiro.Application/"]
-COPY ["../Financeiro.Domain/Financeiro.Domain.csproj", "../Financeiro.Domain/"]
-COPY ["../Financeiro.Infrastructure/Financeiro.Infrastructure.csproj", "../Financeiro.Infrastructure/"]
+COPY ["Financeiro.Api/Financeiro.Api.csproj", "Financeiro.Api/"]
+COPY ["Financeiro.Application/Financeiro.Application.csproj", "Financeiro.Application/"]
+COPY ["Financeiro.Domain/Financeiro.Domain.csproj", "Financeiro.Domain/"]
+COPY ["Financeiro.Infrastructure/Financeiro.Infrastructure.csproj", "Financeiro.Infrastructure/"]
 
-RUN dotnet restore "Financeiro.Api.csproj"
+RUN dotnet restore "Financeiro.Api/Financeiro.Api.csproj"
 
 COPY . .
-WORKDIR /src
+WORKDIR /src/Financeiro.Api
 RUN dotnet publish "Financeiro.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
