@@ -1,0 +1,10 @@
+bin
+obj
+.vs
+.git
+.gitignore
+Dockerfile
+docker-compose.override.yml
+npm-debug.log
+yarn-debug.log
+yarn-error.log

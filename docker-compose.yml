@@ -34,6 +34,38 @@ services:
     networks:
       - financeiro-net
 
+  api:
+    build:
+      context: ./Financeiro.Api
+      dockerfile: Dockerfile
+    container_name: financeiro-api
+    ports:
+      - "5283:5283"
+    depends_on:
+      - sqlserver
+      - redis
+      - keycloak
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=financeiro;User Id=sa;Password=Rafael.2026!;TrustServerCertificate=True;
+      - ConnectionStrings__Redis=redis:6379
+      - Keycloak__BaseUrl=http://keycloak:8080
+      - Keycloak__ClientId=financeiro-api
+    networks:
+      - financeiro-net
+
+  web:
+    build:
+      context: ./Financeiro.Web
+      dockerfile: Dockerfile
+    container_name: financeiro-web
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    networks:
+      - financeiro-net
+
 networks:
   financeiro-net:
     driver: bridge
