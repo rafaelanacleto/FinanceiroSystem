@@ -27,10 +27,14 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: dev-file
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: "false"
     ports:
       - "8080:8080"
     networks:
       - financeiro-net
+    volumes:
+      - keycloak_data:/opt/keycloak/data
 
   redis:
     image: redis:alpine
@@ -114,3 +118,4 @@ networks:
 
 volumes:
   sqlserver_data:
+  keycloak_data:

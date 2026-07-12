@@ -1,17 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { ReactKeycloakProvider } from '@react-keycloak/web'
-import Keycloak from 'keycloak-js'
 import { App } from './App'
 import './index.css'
 import { setupInterceptors } from './services/api';
-
-// 1. Configure sua instância do Keycloak
-const keycloak = new Keycloak({
-  url: 'http://localhost:8080', // URL do seu servidor Keycloak
-  realm: 'Financeiro',           // Nome do seu Realm
-  clientId: 'financeiro-api2',    // Nome do seu Client
-});
+import keycloak from './auth';
 
 setupInterceptors(keycloak);
 

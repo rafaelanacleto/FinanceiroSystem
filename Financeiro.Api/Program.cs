@@ -27,6 +27,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidIssuers = new[]
+            {
+                builder.Configuration["Keycloak:BaseUrl"],
+                "http://localhost:8080/realms/Financeiro"
+            },
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
