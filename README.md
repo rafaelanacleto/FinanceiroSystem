@@ -1,5 +1,5 @@
 # FinanceiroSystem
-Sistema Financeiro Pessoal — API .NET 10 + React 19 + Keycloak + SQL Server + Redis
+Sistema Financeiro Pessoal — API .NET 10 + React + Keycloak + SQL Server + Redis + RabbitMQ
 
 ---
 
@@ -11,54 +11,54 @@ Sistema Financeiro Pessoal — API .NET 10 + React 19 + Keycloak + SQL Server + 
 
 ---
 
-## 1. Subir a infraestrutura (Docker)
+## 1. Subir a stack local
 
-Na raiz do projeto, suba todos os serviços de infra:
+Na raiz do projeto, execute:
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
-Isso sobe:
+Isso sobe os seguintes serviços:
 
-| Serviço       | Endereço                  | Descrição                  |
-|---------------|---------------------------|----------------------------|
-| SQL Server    | `localhost:1433`          | Banco de dados principal   |
-| Keycloak      | `http://localhost:8080`   | Autenticação / JWT         |
-| Redis         | `localhost:6379`          | Cache distribuído          |
-| API .NET      | `http://localhost:5283`   | Backend financeiro         |
-| Frontend      | `http://localhost:5173`   | Aplicação React            |
+| Serviço | Endereço | Descrição |
+|---|---|---|
+| Frontend | http://localhost:3000 | Aplicação React/Vite |
+| API .NET | http://localhost:5283/swagger | Backend financeiro |
+| RabbitMQ UI | http://localhost:15672 | Gerenciamento do broker |
+| Keycloak | http://localhost:8080 | Autenticação / JWT |
+| SQL Server | localhost:1433 | Banco principal |
+| Redis | localhost:6379 | Cache |
 
 ---
 
-## 2. Serviços e portas
+## 2. Credenciais locais
 
-Quando o projeto está rodando localmente ou via Docker Compose, os endpoints ficam assim:
-
-| Aplicação     | Endereço                      | Observação |
-|--------------|-------------------------------|------------|
-| SQL Server   | `localhost:1433`              | Porta do banco no Docker |
-| Keycloak     | `http://localhost:8080`       | UI de administração |
-| Redis        | `localhost:6379`              | Cache no Docker |
-| API .NET     | `http://localhost:5283`       | Backend financeiro |
-| Swagger      | `http://localhost:5283/swagger` | Docs da API |
-| Frontend     | `http://localhost:5173`       | App React |
+- RabbitMQ:
+  - usuário: `guest`
+  - senha: `guest`
+- Keycloak:
+  - usuário: `admin`
+  - senha: `admin`
 
 ---
 
 ## 3. Configurar o Keycloak
 
-1. Acesse `http://localhost:8080` e faça login com `admin` / `admin`
-2. Crie um **Realm** chamado `Financeiro`
-3. Crie um **Client** chamado `financeiro-api`
-   - Client authentication: **ON**
-   - Valid redirect URIs: `http://localhost:5173/*`
-   - Web origins: `http://localhost:5173`
-4. Crie um usuário de teste e defina uma senha
+1. Acesse http://localhost:8080
+2. Faça login com `admin` / `admin`
+3. Crie um realm chamado `Financeiro`
+4. Crie um client chamado `financeiro-api`
+   - Client authentication: `ON`
+   - Valid redirect URIs: `http://localhost:3000/*`
+   - Web origins: `http://localhost:3000`
+5. Crie um usuário de teste e defina uma senha
 
 ---
 
-## 3. Aplicar as migrations (banco de dados)
+## 4. Aplicar as migrations
+
+Se precisar criar/atualizar o banco:
 
 ```bash
 cd Financeiro.Api
@@ -67,19 +67,16 @@ dotnet ef database update
 
 ---
 
-## 4. Rodar a API (.NET)
+## 5. Rodar os projetos localmente sem Docker
+
+### API
 
 ```bash
 cd Financeiro.Api
 dotnet run
 ```
 
-A API estará disponível em `http://localhost:5283`.  
-Swagger em `http://localhost:5283/swagger`.
-
----
-
-## 5. Rodar o frontend (React)
+### Frontend
 
 ```bash
 cd Financeiro.Web
@@ -87,38 +84,40 @@ npm install
 npm run dev
 ```
 
-O frontend estará disponível em `http://localhost:5173`.
-
 ---
 
-## Resumo dos comandos
+## 6. Comandos úteis
 
 ```bash
-# 1. Infraestrutura
-docker compose up -d
+# Subir tudo
+docker compose up -d --build
 
-# 2. Migrations
-cd Financeiro.Api && dotnet ef database update && cd ..
+# Verificar containers
+docker compose ps
 
-# 3. API (terminal separado)
-cd Financeiro.Api && dotnet run
+# Parar tudo
+docker compose stop
 
-# 4. Frontend (terminal separado)
-cd Financeiro.Web && npm install && npm run dev
+# Remover containers e redes
+# docker compose down
 ```
 
 ---
 
-## Estrutura do projeto
+## 7. Estrutura do projeto
 
-```
+```text
 FinanceiroSystem/
-├── Financeiro.Api/           # Controllers, Program.cs, configurações
-├── Financeiro.Application/   # CQRS — Commands, Queries, Handlers
-├── Financeiro.Domain/        # Entidades e exceções de domínio
-├── Financeiro.Infrastructure/# DbContext e Migrations (EF Core)
-├── Financeiro.Web/           # Frontend React + Vite + TailwindCSS
-└── docker-compose.yml        # Infraestrutura local
+├── Financeiro.Api/           # API ASP.NET Core
+├── Financeiro.Application/   # CQRS e handlers
+├── Financeiro.Domain/        # Entidades e regras de domínio
+├── Financeiro.Infrastructure/ # EF Core, DbContext e migrations
+├── Financeiro.Web/           # Frontend React + Vite
+└── docker-compose.yml        # Orquestração local da stack
 ```
 
-docker compose stop
+---
+
+## 8. Observação para o futuro
+
+A estrutura do compose já está preparada para receber uma futura API de e-mail e para a comunicação via RabbitMQ entre os serviços. Para isso, basta adicionar mais um serviço no mesmo arquivo e apontar a conexão para o host `rabbitmq` dentro da rede Docker.
