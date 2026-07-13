@@ -1,6 +1,22 @@
 # FinanceiroSystem
 Sistema Financeiro Pessoal — API .NET 10 + React + Keycloak + SQL Server + Redis + RabbitMQ
 
+[Browser / Frontend React]
+            |
+            | HTTP(S)
+            v
+      [API Gateway]
+            |
+    +-------+--------+
+    |                |
+    v                v
+[Financeiro.Api]  [outros serviços futuros]
+    |
+    +-- SQL Server
+    +-- Redis
+    +-- RabbitMQ
+    +-- Keycloak
+
 ---
 
 ## Pré-requisitos
@@ -121,3 +137,38 @@ FinanceiroSystem/
 ## 8. Observação para o futuro
 
 A estrutura do compose já está preparada para receber uma futura API de e-mail e para a comunicação via RabbitMQ entre os serviços. Para isso, basta adicionar mais um serviço no mesmo arquivo e apontar a conexão para o host `rabbitmq` dentro da rede Docker.
+
+
+## 9. Pŕoximos passos
+
+Podemos criar um gateway na frente do sistema?
+Sim, podemos.
+
+Quando faz sentido
+Você quer uma única entrada para todos os serviços
+Planeja adicionar mais APIs/microserviços no futuro
+Deseja centralizar:
+TLS/HTTPS
+roteamento
+log de requisições
+rate limiting
+autenticação/autorização
+versionamento de API
+CORS
+
+O que eu recomendaria
+Se o objetivo for apenas proxy reverso e unificação de host: Nginx, Traefik ou Caddy
+Se quiser gateway específico .NET com roteamento e políticas: Ocelot
+Se quiser um gateway de API mais completo: Kong, API Umbrella, Ambassador, etc.
+Como encaixar no docker-compose.yml
+Adicionar um serviço gateway
+Fazer o frontend acessar o gateway em vez de chamar api direto
+O gateway direciona as requisições para api
+Backend pode continuar validando JWT no Financeiro.Api
+Observação prática
+Hoje o projeto é essencialmente um backend monolítico + frontend separado. Um gateway não é obrigatório agora, mas é uma boa camada de infraestrutura se você quiser:
+
+melhorar a organização
+preparar para múltiplos serviços
+padronizar entrada de tráfego
+Se quiser, posso também sugerir uma configuração específica de docker-compose.yml com Traefik ou Ocelot.
