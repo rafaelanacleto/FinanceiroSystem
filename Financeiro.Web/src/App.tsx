@@ -8,7 +8,7 @@ import { FinancialChart } from './components/FinancialChart';
 import { NewTransactionModal } from './components/NewTransactionModal';
 import { DateFilter } from './components/DateFilter';
 
-type Page = 'dashboard' | 'relatorios' | 'configuracoes';
+type Page = 'dashboard' | 'relatorios' | 'configuracoes' | 'perfil' | 'ajuda';
 type ThemeMode = 'light' | 'dark';
 
 export function App() {
@@ -69,6 +69,14 @@ export function App() {
                 onClick={() => setCurrentPage('configuracoes')}
                 className={`text-sm font-bold px-4 py-2 rounded-xl transition-colors ${currentPage === 'configuracoes' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
               >Configurações</button>
+              <button
+                onClick={() => setCurrentPage('perfil')}
+                className={`text-sm font-bold px-4 py-2 rounded-xl transition-colors ${currentPage === 'perfil' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+              >Perfil</button>
+              <button
+                onClick={() => setCurrentPage('ajuda')}
+                className={`text-sm font-bold px-4 py-2 rounded-xl transition-colors ${currentPage === 'ajuda' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+              >Ajuda</button>
             </div>
           </div>
 
@@ -89,7 +97,7 @@ export function App() {
             <div>
               <h2 className="text-4xl font-black text-slate-800 tracking-tight">Olá, {userName}! 👋</h2>
               <p className="text-slate-500 font-medium mt-1">
-                Gerencie suas finanças de <span className="text-emerald-600 font-bold">Março/2026</span>
+                Gerencie suas finanças de <span className="text-emerald-600 font-bold">{selectedMonth}/{selectedYear}</span>
               </p>
             </div>
 

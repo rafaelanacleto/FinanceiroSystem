@@ -56,45 +56,45 @@ services:
     networks:
       - financeiro-net
 
-  api:
-    build:
-      context: .
-      dockerfile: Financeiro.Api/Dockerfile
-    container_name: financeiro-api
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      keycloak:
-        condition: service_started
-      rabbitmq:
-        condition: service_started
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:5283
-      ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=financeiro;User Id=sa;Password=Rafael.2026!;TrustServerCertificate=True;
-      ConnectionStrings__Redis: redis:6379
-      Keycloak__BaseUrl: http://keycloak:8080/realms/Financeiro
-      Keycloak__ClientId: financeiro-api
-      RabbitMQ__Host: rabbitmq
-      RabbitMQ__Port: "5672"
-    ports:
-      - "5283:5283"
-    networks:
-      - financeiro-net
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Financeiro.Api/Dockerfile
+  #   container_name: financeiro-api
+  #   depends_on:
+  #     sqlserver:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_started
+  #     keycloak:
+  #       condition: service_started
+  #     rabbitmq:
+  #       condition: service_started
+  #   environment:
+  #     ASPNETCORE_ENVIRONMENT: Development
+  #     ASPNETCORE_URLS: http://+:5283
+  #     ConnectionStrings__DefaultConnection: Server=sqlserver,1433;Database=financeiro;User Id=sa;Password=Rafael.2026!;TrustServerCertificate=True;
+  #     ConnectionStrings__Redis: redis:6379
+  #     Keycloak__BaseUrl: http://keycloak:8080/realms/Financeiro
+  #     Keycloak__ClientId: financeiro-api
+  #     RabbitMQ__Host: rabbitmq
+  #     RabbitMQ__Port: "5672"
+  #   ports:
+  #     - "5283:5283"
+  #   networks:
+  #     - financeiro-net
 
-  frontend:
-    build:
-      context: ./Financeiro.Web
-      dockerfile: Dockerfile
-    container_name: financeiro-web
-    depends_on:
-      - api
-    ports:
-      - "3000:80"
-    networks:
-      - financeiro-net
+  # frontend:
+  #   build:
+  #     context: ./Financeiro.Web
+  #     dockerfile: Dockerfile
+  #   container_name: financeiro-web
+  #   depends_on:
+  #     - api
+  #   ports:
+  #     - "3000:80"
+  #   networks:
+  #     - financeiro-net
 
   # email-api:
   #   build:
