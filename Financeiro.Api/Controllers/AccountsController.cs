@@ -98,5 +98,15 @@ public class AccountsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpDelete("transactions/{id:guid}")]
+    public async Task<IActionResult> DeleteTransaction(Guid id)
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        await _mediator.Send(new DeleteTransactionCommand(id));
+        return Ok();
+    }
+
 
 }
