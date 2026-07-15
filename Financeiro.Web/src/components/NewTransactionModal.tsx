@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../services/api';
 
 interface NewTransactionModalProps {
-  onClose: () => void;           // Agora vamos usar essa prop!
-  onTransactionCreated: () => void; 
+  onClose: () => void;
+  onTransactionCreated: () => void;
+  transactionToEdit?: any;
 }
 
 export const CATEGORIES = [
@@ -38,27 +39,55 @@ export const CATEGORIES = [
   { id: 'Taxas Bancárias', icon: '🏦', color: 'bg-slate-200 text-slate-800' },
 ];
 
-export function NewTransactionModal({ onClose, onTransactionCreated }: NewTransactionModalProps) {
+export function NewTransactionModal({ onClose, onTransactionCreated, transactionToEdit }: NewTransactionModalProps) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Outros');
   const [type, setType] = useState<number>(0);
+  const [transactionDate, setTransactionDate] = useState(() => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - offset * 60000);
+    return localDate.toISOString().slice(0, 16);
+  });
   const [loading, setLoading] = useState(false);
+  const isEditing = Boolean(transactionToEdit);
+
+  useEffect(() => {
+    if (!transactionToEdit) return;
+
+    const dateValue = transactionToEdit.transactionDate || transactionToEdit.createdAt;
+    const normalizedDate = new Date(dateValue);
+    const offset = normalizedDate.getTimezoneOffset();
+    const localDate = new Date(normalizedDate.getTime() - offset * 60000);
+
+    setDescription(transactionToEdit.description || '');
+    setAmount(String(transactionToEdit.amount ?? ''));
+    setCategory(transactionToEdit.category || 'Outros');
+    setType(Number(transactionToEdit.type ?? 0));
+    setTransactionDate(localDate.toISOString().slice(0, 16));
+  }, [transactionToEdit]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await api.post('/Accounts/transactions', {
+      const payload = {
         description,
         amount: Math.abs(Number(amount)),
+        transactionDate: new Date(transactionDate).toISOString(),
         type: type,
         category: category
-      });
+      };
 
-      // Sucesso!
-      onTransactionCreated(); // Isso vai dar o refresh e fechar o modal no App.tsx
+      if (isEditing && transactionToEdit?.id) {
+        await api.put(`/Accounts/transactions/${transactionToEdit.id}`, payload);
+      } else {
+        await api.post('/Accounts/transactions', payload);
+      }
+
+      onTransactionCreated();
     } catch (error) {
       console.error("Erro ao salvar:", error);
       alert("Erro ao salvar transação");
@@ -88,7 +117,7 @@ export function NewTransactionModal({ onClose, onTransactionCreated }: NewTransa
           <span className="text-2xl">✕</span>
         </button>
 
-        <h3 className="text-2xl font-black text-slate-800 mb-6">Novo Lançamento</h3>
+        <h3 className="text-2xl font-black text-slate-800 mb-6">{isEditing ? 'Editar Lançamento' : 'Novo Lançamento'}</h3>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           
@@ -153,6 +182,17 @@ export function NewTransactionModal({ onClose, onTransactionCreated }: NewTransa
                 </select>
               </div>
             </div>
+
+            <div>
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Data da transação</label>
+              <input
+                type="datetime-local"
+                value={transactionDate}
+                onChange={(e) => setTransactionDate(e.target.value)}
+                className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all font-medium text-slate-700"
+                required
+              />
+            </div>
           </div>
 
           {/* BOTÃO SALVAR */}
@@ -167,7 +207,7 @@ export function NewTransactionModal({ onClose, onTransactionCreated }: NewTransa
             {loading ? (
                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              `Confirmar ${type === 0 ? 'Receita' : 'Despesa'}`
+              `${isEditing ? 'Salvar' : 'Confirmar'} ${type === 0 ? 'Receita' : 'Despesa'}`
             )}
           </button>
         </form>

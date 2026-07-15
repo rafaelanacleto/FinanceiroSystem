@@ -22,11 +22,13 @@ export function App() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
 
   const userName = keycloak?.tokenParsed?.given_name || "Usuário";
 
   const handleTransactionCreated = () => {
     setIsModalOpen(false);
+    setTransactionToEdit(null);
     window.location.reload();
   };
 
@@ -150,7 +152,8 @@ export function App() {
           <TransactionList
             month={selectedMonth}
             year={selectedYear}
-            onEdit={(_transaction) => {
+            onEdit={(transaction) => {
+              setTransactionToEdit(transaction);
               setIsModalOpen(true);
             }}
           />
@@ -204,8 +207,10 @@ export function App() {
         <NewTransactionModal 
           onClose={() => {
             setIsModalOpen(false);
+            setTransactionToEdit(null);
           }} 
           onTransactionCreated={handleTransactionCreated}
+          transactionToEdit={transactionToEdit}
         />
       )}
     </div>

@@ -50,11 +50,17 @@ public class AccountsController : ControllerBase
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
 
-        // Em vez de 'command with { AccountId = userId }', 
-        // o seu Handler deve ser responsável por achar a conta do usuário logado.
-        // Ou, você passa o UserId no comando e o Handler resolve.
-
         await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpPut("transactions/{id:guid}")]
+    public async Task<IActionResult> PutTransaction(Guid id, [FromBody] UpdateTransactionCommand command)
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        await _mediator.Send(command with { Id = id });
         return Ok();
     }
 
