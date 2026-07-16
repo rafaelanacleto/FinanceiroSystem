@@ -3,9 +3,11 @@ import { useKeycloak } from '@react-keycloak/web';
 
 // Importação dos seus Componentes
 import { BalanceCard } from './components/BalanceCard';
+import { HelpMenu } from './components/HelpMenu';
 import { TransactionList } from './components/TransactionList';
 import { FinancialChart } from './components/FinancialChart';
 import { NewTransactionModal } from './components/NewTransactionModal';
+import { ProfileUnderConstruction } from './components/ProfileUnderConstruction';
 import { DateFilter } from './components/DateFilter';
 
 type Page = 'dashboard' | 'relatorios' | 'configuracoes' | 'perfil' | 'ajuda';
@@ -199,6 +201,15 @@ export function App() {
               </div>
             </div>
           </section>
+        )}
+
+        {currentPage === 'perfil' && (
+          <ProfileUnderConstruction />
+        )}
+
+        {/* PÁGINA DE RELATÓRIOS (AJUDA) */}
+        {currentPage === 'ajuda' && (
+          <HelpMenu />
         )}
       </main>
 
