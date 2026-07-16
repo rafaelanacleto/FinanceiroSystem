@@ -27,10 +27,11 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: dev-file
-      KC_HOSTNAME: localhost
+      #KC_HOSTNAME: localhost
       KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
     ports:
-      - "8080:8080"
+      - "0.0.0.0:8080:8080"
     networks:
       - financeiro-net
     volumes:

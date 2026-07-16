@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5283/api', // Ajuste para a porta da sua API .NET
+  baseURL: 'http://192.168.0.234:5283/api', // Ajuste para a porta da sua API .NET
 });
 
 // Criamos uma função para configurar o interceptor com a instância real do Keycloak

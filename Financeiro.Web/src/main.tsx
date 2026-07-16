@@ -11,8 +11,12 @@ setupInterceptors(keycloak);
 // 2. Configurações de inicialização (opcional)
 const initOptions = {
   onLoad: 'login-required', // Obriga o login ao abrir o app
-  checkLoginIframe: false
+  checkLoginIframe: false,
+  redirectUri: window.location.origin, 
+  pkceMethod: 'S256',
+  enableLogging: true
 };
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
