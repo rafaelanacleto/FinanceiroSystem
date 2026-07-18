@@ -110,7 +110,13 @@ const [openFaq, setOpenFaq] = useState<Record<number, boolean>>({});
           {faqItems.map((item, index) => (
             <div key={index} className="group">
               <button
-                
+                type="button"
+                onClick={() => {
+                  setOpenFaq(prev => ({
+                    ...prev,
+                    [index]: !prev[index]
+                  }));
+                }}
                 className="w-full flex items-center justify-between p-5 text-left font-medium text-slate-800 hover:bg-slate-50/50 transition-colors"
               >
                 <span>{item.question}</span>
