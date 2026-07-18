@@ -41,7 +41,7 @@ export function FinancialChart({ month, year }: { month: number, year: number })
     return '#64748b';
   }
 
-  useEffect(() => { fetchSummary(); }, []);
+  useEffect(() => { fetchSummary(); }, [month, year]);
 
   if (loading) return <div className="h-[350px] flex items-center justify-center text-slate-400">Carregando análise...</div>;
 
