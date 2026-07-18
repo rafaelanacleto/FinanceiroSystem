@@ -1,25 +1,21 @@
-import React, { useState } from 'react';
-import { 
-  BookOpen, 
-  HelpCircle, 
-  Keyboard, 
-  MessageSquare, 
-  ChevronDown, 
-  ChevronUp, 
-  Plus, 
-  Activity, 
-  Lock, 
+import { useState } from 'react';
+import {
+  BookOpen,
+  HelpCircle,
+  Keyboard,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
   FileText,
-  Mail,
   AlertTriangle
 } from 'lucide-react'; // Instale lucide-react para ícones, ou substitua por SVGs
 
 export function HelpMenu() {
- 
-// const [openFaq, setOpenFaq] = useState({});
 
-// Para esta:
-const [openFaq, setOpenFaq] = useState<Record<number, boolean>>({});
+  // const [openFaq, setOpenFaq] = useState({});
+
+  // Para esta:
+  const [openFaq, setOpenFaq] = useState<Record<number, boolean>>({});
 
   const faqItems = [
     {
@@ -50,7 +46,7 @@ const [openFaq, setOpenFaq] = useState<Record<number, boolean>>({});
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-12 text-slate-800">
-      
+
       {/* TÍTULO DA PÁGINA */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Como podemos ajudar?</h1>
@@ -63,7 +59,7 @@ const [openFaq, setOpenFaq] = useState<Record<number, boolean>>({});
           <BookOpen className="w-6 h-6 text-emerald-600" />
           <h2 className="text-2xl font-bold text-slate-900">Primeiros Passos</h2>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100/80 hover:shadow-md transition-shadow">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold mb-4 text-sm">
@@ -138,7 +134,7 @@ const [openFaq, setOpenFaq] = useState<Record<number, boolean>>({});
 
       {/* SEÇÃO 3 & 4 EM DUAS COLUNAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
+
         {/* SEÇÃO 3: ATALHOS DO TECLADO */}
         <section className="space-y-6">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
