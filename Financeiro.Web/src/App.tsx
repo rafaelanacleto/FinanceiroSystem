@@ -131,7 +131,7 @@ export function App() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
             {/* COLUNA DA ESQUERDA (SALDO) */}
-            <div className="lg:col-span-4 space-y-8">
+            <div className="lg:col-span-5 space-y-8">
               <BalanceCard
                 month={selectedMonth}
                 year={selectedYear}
@@ -139,7 +139,7 @@ export function App() {
             </div>
 
             {/* COLUNA DA DIREITA (GRÁFICO) */}
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-7">
               <FinancialChart
                 month={selectedMonth}
                 year={selectedYear}

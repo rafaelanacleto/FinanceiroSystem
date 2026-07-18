@@ -7,7 +7,7 @@ interface BalanceProps {
 }
 
 export function BalanceCard({ month, year }: BalanceProps) {
-  const [balanceData, setBalanceData] = useState({ totalIncome: 0, totalExpenses: 0, balance: 0 });
+  const [balanceData, setBalanceData] = useState({ totalIncome: 0, totalExpenses: 0, balance: 0, annualBalance: 0 });
   const [loading, setLoading] = useState(true);
 
   async function fetchBalance() {
@@ -31,11 +31,21 @@ export function BalanceCard({ month, year }: BalanceProps) {
   if (loading) return <div className="h-32 bg-slate-50 animate-pulse rounded-3xl" />;
 
   return (
-    <div className="bg-emerald-600 p-8 rounded-[2rem] text-white shadow-xl shadow-emerald-200">
-      <p className="text-emerald-100 font-bold uppercase text-[10px] tracking-widest mb-1">Saldo do Período</p>
-      <h2 className="text-4xl font-black mb-6">
-        {balanceData.balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-      </h2>
+    <div className="bg-emerald-600 p-6 lg:p-8 rounded-[2rem] text-white shadow-xl shadow-emerald-200">
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <p className="text-emerald-100 font-bold uppercase text-[10px] tracking-widest mb-1">Saldo do Período</p>
+          <h2 className="text-xl lg:text-2xl font-black truncate" title={balanceData.balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}>
+            {balanceData.balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </h2>
+        </div>
+        <div className="border-l border-emerald-500/40 pl-4">
+          <p className="text-emerald-100 font-bold uppercase text-[10px] tracking-widest mb-1">Saldo Anual ({year})</p>
+          <h2 className="text-xl lg:text-2xl font-black truncate" title={balanceData.annualBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}>
+            {balanceData.annualBalance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </h2>
+        </div>
+      </div>
       
       <div className="flex justify-between border-t border-emerald-500/50 pt-6">
         <div>

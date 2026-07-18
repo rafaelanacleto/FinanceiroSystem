@@ -22,7 +22,7 @@ public class GetAccountSummaryHandler : IRequestHandler<GetAccountSummaryQuery, 
             .FirstOrDefaultAsync(a => a.UserId == request.UserId, cancellationToken);
 
         if (account == null)
-            return new AccountSummaryDto(0, 0, []);
+            return new AccountSummaryDto(0, 0, 0, []);
 
         var transactions = await _context.Transactions
             .AsNoTracking()
@@ -48,6 +48,22 @@ public class GetAccountSummaryHandler : IRequestHandler<GetAccountSummaryQuery, 
             ))
             .ToList();
 
-        return new AccountSummaryDto(income, expenses, categoryExpenses);
+        var annualIncome = await _context.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == account.Id &&
+                        t.CreatedAt.Year == request.Year &&
+                        t.Type == TransactionType.Income)
+            .SumAsync(t => t.Amount, cancellationToken);
+
+        var annualExpenses = await _context.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == account.Id &&
+                        t.CreatedAt.Year == request.Year &&
+                        t.Type == TransactionType.Expense)
+            .SumAsync(t => t.Amount, cancellationToken);
+
+        var annualBalance = annualIncome - annualExpenses;
+
+        return new AccountSummaryDto(income, expenses, annualBalance, categoryExpenses);
     }
 }
