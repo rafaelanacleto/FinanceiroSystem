@@ -9,6 +9,8 @@ import { FinancialChart } from './components/FinancialChart';
 import { NewTransactionModal } from './components/NewTransactionModal';
 import { ProfileUnderConstruction } from './components/ProfileUnderConstruction';
 import { DateFilter } from './components/DateFilter';
+import { FinancialTrends } from './components/FinancialTrends';
+import { EvolutionChart } from './components/EvolutionChart';
 
 type Page = 'dashboard' | 'relatorios' | 'configuracoes' | 'perfil' | 'ajuda';
 type ThemeMode = 'light' | 'dark';
@@ -143,6 +145,19 @@ export function App() {
               <FinancialChart
                 month={selectedMonth}
                 year={selectedYear}
+              />
+            </div>
+
+            {/* NOVA COLUNA TESTE */}
+            <div className="lg:col-span-5 flex flex-col">
+              <FinancialTrends month={selectedMonth} year={selectedYear} />
+            </div>
+
+            <div className='lg:col-span-7'>
+              {/* SEU NOVO GRÁFICO DE EVOLUÇÃO TEMPORAL AQUI */}
+              <EvolutionChart
+                currentMonth={selectedMonth}
+                currentYear={selectedYear}
               />
             </div>
 

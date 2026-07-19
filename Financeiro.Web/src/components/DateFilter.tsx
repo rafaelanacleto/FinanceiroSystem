@@ -1,38 +1,64 @@
+import type { ChangeEvent } from 'react';
+
 interface DateFilterProps {
   month: number;
   year: number;
   onChange: (month: number, year: number) => void;
 }
 
-export function DateFilter({ month, year, onChange }: DateFilterProps) {
-  const months = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
+const MONTHS = [
+  { value: 1, label: 'Janeiro' },
+  { value: 2, label: 'Fevereiro' },
+  { value: 3, label: 'Março' },
+  { value: 4, label: 'Abril' },
+  { value: 5, label: 'Maio' },
+  { value: 6, label: 'Junho' },
+  { value: 7, label: 'Julho' },
+  { value: 8, label: 'Agosto' },
+  { value: 9, label: 'Setembro' },
+  { value: 10, label: 'Outubro' },
+  { value: 11, label: 'Novembro' },
+  { value: 12, label: 'Dezembro' },
+];
 
-  const years = [2023, 2024, 2025, 2026, 2027]; 
+// Gera uma lista de anos (ex: 3 anos atrás até 2 anos no futuro)
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - 3 + i);
+
+export function DateFilter({ month, year, onChange }: DateFilterProps) {
+  const handleMonthChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    onChange(Number(e.target.value), year);
+  };
+
+  const handleYearChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    onChange(month, Number(e.target.value));
+  };
 
   return (
-    <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
-      <select 
-        value={month} 
-        onChange={(e) => onChange(Number(e.target.value), year)}
-        className="bg-transparent border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer pr-8"
+    <div className="flex items-center gap-2 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
+      <select
+        value={month}
+        onChange={handleMonthChange}
+        className="bg-transparent text-sm font-bold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
       >
-        {months.map((m, i) => (
-          <option key={i} value={i + 1}>{m}</option>
+        {MONTHS.map((m) => (
+          <option key={m.value} value={m.value}>
+            {m.label}
+          </option>
         ))}
       </select>
 
-      <div className="w-[1px] h-4 bg-slate-200"></div>
+      <div className="h-5 w-px bg-slate-200" />
 
-      <select 
-        value={year} 
-        onChange={(e) => onChange(month, Number(e.target.value))}
-        className="bg-transparent border-none text-sm font-bold text-slate-400 focus:ring-0 cursor-pointer"
+      <select
+        value={year}
+        onChange={handleYearChange}
+        className="bg-transparent text-sm font-bold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
       >
-        {years.map(y => (
-          <option key={y} value={y}>{y}</option>
+        {YEARS.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
         ))}
       </select>
     </div>
