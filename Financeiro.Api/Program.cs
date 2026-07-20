@@ -30,7 +30,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuers = new[]
             {
                 builder.Configuration["Keycloak:BaseUrl"],
-                "http://192.168.0.234:8080/realms/Financeiro"
+                "http://localhost:8080/realms/Financeiro"
             },
             ValidateAudience = false,
             ValidateLifetime = true,
