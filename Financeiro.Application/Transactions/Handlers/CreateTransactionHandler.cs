@@ -17,17 +17,20 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand
     private readonly IDistributedCache _cache;
     private readonly ILogger<CreateTransactionHandler> _logger;
     private readonly IUserService _userService;
+    private readonly IMediator _mediator;
 
     public CreateTransactionHandler(
         ApplicationDbContext context,
         IDistributedCache cache,
         ILogger<CreateTransactionHandler> logger,
-        IUserService userService)
+        IUserService userService,
+        IMediator mediator)
     {
         _context = context;
         _cache = cache;
         _logger = logger;
         _userService = userService;
+        _mediator = mediator;
     }
 
     public async Task<Guid> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
@@ -76,6 +79,9 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand
 
         _context.Transactions.Add(transaction);
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Dispara o evento de transação criada
+        await _mediator.Publish(new Financeiro.Domain.Event.TransactionCreatedEvent(transaction.Id, account.Id, transaction.Amount, transaction.TransactionDate), cancellationToken);
 
         await _cache.RemoveAsync(CacheKeys.AccountBalance(account.Id), cancellationToken);
 

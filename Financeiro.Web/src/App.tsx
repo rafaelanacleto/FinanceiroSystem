@@ -11,6 +11,7 @@ import { ProfileUnderConstruction } from './components/ProfileUnderConstruction'
 import { DateFilter } from './components/DateFilter';
 import { FinancialTrends } from './components/FinancialTrends';
 import { EvolutionChart } from './components/EvolutionChart';
+import { NotificationCenter } from './components/NotificationCenter';
 
 type Page = 'dashboard' | 'relatorios' | 'configuracoes' | 'perfil' | 'ajuda';
 type ThemeMode = 'light' | 'dark';
@@ -86,12 +87,15 @@ export function App() {
             </div>
           </div>
 
-          <button
-            onClick={() => keycloak.logout()}
-            className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors"
-          >
-            Sair da conta
-          </button>
+          <div className="flex items-center gap-4">
+            <NotificationCenter />
+            <button
+              onClick={() => keycloak.logout()}
+              className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors"
+            >
+              Sair da conta
+            </button>
+          </div>
         </div>
       </nav>
 

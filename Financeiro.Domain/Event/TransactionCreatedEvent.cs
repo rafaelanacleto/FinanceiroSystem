@@ -1,6 +1,8 @@
+using MediatR;
+
 namespace Financeiro.Domain.Event
 {
-    public class TransactionCreatedEvent
+    public class TransactionCreatedEvent : INotification
     {
         public TransactionCreatedEvent(Guid transactionId, Guid accountId, decimal amount, DateTime createdAt)
         {

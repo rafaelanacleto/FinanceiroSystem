@@ -1,12 +1,8 @@
-namespace financeiro.Application.Notifications.Commands
-{
-    public class MarkNotificationsAsReadCommand
-    {
-        public MarkNotificationsAsReadCommand(List<Guid> notificationIds)
-        {
-            NotificationIds = notificationIds;
-        }
+using MediatR;
+using System;
+using System.Collections.Generic;
 
-        public List<Guid> NotificationIds { get; }
-    }
+namespace Financeiro.Application.Notifications.Commands
+{
+    public record MarkNotificationsAsReadCommand(List<Guid> NotificationIds) : IRequest;
 }

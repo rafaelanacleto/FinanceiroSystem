@@ -1,6 +1,7 @@
 using Financeiro.Api;
 using Financeiro.Application.Common.Interfaces;
 using Financeiro.Infrastructure.Data;
+using Financeiro.Infrastructure.BackgroundServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -49,6 +50,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "Financeiro_";
 });
+
+builder.Services.AddHostedService<NotificationAutomationWorker>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Financeiro.Application.Accounts.Commands.CreateAccountCommand).Assembly));
