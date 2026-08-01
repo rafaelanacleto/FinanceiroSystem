@@ -17,6 +17,9 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchText, setSearchText] = useState('');
+  const [selectedType, setSelectedType] = useState<'all' | '0' | '1'>('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const ITEMS_PER_PAGE = 10;
 
   async function fetchTransactions() {
@@ -38,7 +41,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     try {
       await api.delete(`/Accounts/transactions/${id}`);
       // Remove da lista local para dar feedback imediato
-      setTransactions(transactions.filter(t => t.id !== id));
+      setTransactions(prev => prev.filter(t => t.id !== id));
     } catch (error) {
       console.error("Erro ao excluir:", error);
       alert("Erro ao excluir transação.");
@@ -50,15 +53,37 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     setCurrentPage(1);
   }, [month, year]);
 
-  const totalPages = Math.max(1, Math.ceil(transactions.length / ITEMS_PER_PAGE));
-  const paginatedTransactions = transactions.slice(
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedType, selectedCategory]);
+
+  const normalizedSearch = searchText.trim().toLowerCase();
+  const filteredTransactions = transactions.filter((transaction) => {
+    const description = transaction.description?.toLowerCase() ?? '';
+    const categoryText = transaction.category?.toLowerCase() ?? '';
+
+    const matchesText = !normalizedSearch || `${description} ${categoryText}`.includes(normalizedSearch);
+    const matchesType = selectedType === 'all' || String(transaction.type) === selectedType;
+    const matchesCategory = selectedCategory === 'all' || transaction.category === selectedCategory;
+
+    return matchesText && matchesType && matchesCategory;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE));
+  const paginatedTransactions = filteredTransactions.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   // --- LÓGICA DE EXPORTAÇÃO EXCEL ---
   const exportToExcel = () => {
-    const dataToExport = transactions.map(t => ({
+    const dataToExport = filteredTransactions.map(t => ({
       Descrição: t.description,
       Categoria: t.category,
       Tipo: t.type === 0 ? 'Receita' : 'Despesa',
@@ -78,10 +103,10 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     const formatCurrency = (value: number) =>
       value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    const totalEntradas = transactions
+    const totalEntradas = filteredTransactions
       .filter(t => t.type === 0)
       .reduce((acc, t) => acc + Number(t.amount || 0), 0);
-    const totalSaidas = transactions
+    const totalSaidas = filteredTransactions
       .filter(t => t.type !== 0)
       .reduce((acc, t) => acc + Number(t.amount || 0), 0);
     const totalGastos = totalSaidas;
@@ -115,7 +140,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
     doc.text(`Balanço: ${formatCurrency(balanco)}`, 14, 61);
     doc.setTextColor(0, 0, 0);
 
-    const tableRows = transactions.map(t => [
+    const tableRows = filteredTransactions.map(t => [
       t.description,
       t.category,
       t.type === 0 ? 'Receita' : 'Despesa',
@@ -151,6 +176,69 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
 
   return (
     <div className="space-y-4">
+      <div className="rounded-[2rem] border border-slate-100 bg-white p-4 shadow-sm">
+        <div className="grid gap-3 md:grid-cols-[2fr_1fr_1fr_auto]">
+          <label className="flex flex-col gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+            <span>Texto</span>
+            <input
+              type="text"
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              placeholder="Buscar descrição ou categoria"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white"
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+            <span>Tipo</span>
+            <select
+              value={selectedType}
+              onChange={(event) => setSelectedType(event.target.value as 'all' | '0' | '1')}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white"
+            >
+              <option value="all">Todos</option>
+              <option value="0">Receita</option>
+              <option value="1">Despesa</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+            <span>Categoria</span>
+            <select
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white"
+            >
+              <option value="all">Todas</option>
+              {CATEGORIES.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.id}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSearchText('');
+              setSelectedType('all');
+              setSelectedCategory('all');
+            }}
+            className="self-end rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.2em] text-slate-500 transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            Limpar
+          </button>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+          <span>{filteredTransactions.length} registro(s) exibidos</span>
+          {(searchText || selectedType !== 'all' || selectedCategory !== 'all') && (
+            <span>Filtros ativos</span>
+          )}
+        </div>
+      </div>
+
       <div className="flex justify-between items-center px-2">
         <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Extrato Detalhado</h3>
 
@@ -228,17 +316,17 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
           </tbody>
         </table>
 
-        {transactions.length === 0 && (
+        {filteredTransactions.length === 0 && (
           <div className="py-20 text-center">
             <div className="text-4xl mb-3">📁</div>
             <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">Nenhuma movimentação encontrada</p>
           </div>
         )}
 
-        {transactions.length > ITEMS_PER_PAGE && (
+        {filteredTransactions.length > ITEMS_PER_PAGE && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Página {currentPage} de {totalPages} &mdash; {transactions.length} registros
+              Página {currentPage} de {totalPages} &mdash; {filteredTransactions.length} registros
             </span>
             <div className="flex items-center gap-2">
               <button
