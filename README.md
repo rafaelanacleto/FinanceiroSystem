@@ -1,5 +1,5 @@
 # FinanceiroSystem
-Sistema Financeiro Pessoal — API .NET 10 + React + Keycloak + SQL Server + Redis + RabbitMQ
+Sistema Financeiro Pessoal — API .NET 10 + React + Supabase Auth/Postgres + Redis + RabbitMQ
 
 [Browser / Frontend React]
             |
@@ -12,10 +12,9 @@ Sistema Financeiro Pessoal — API .NET 10 + React + Keycloak + SQL Server + Red
     v                v
 [Financeiro.Api]  [outros serviços futuros]
     |
-    +-- SQL Server
+    +-- Supabase (Postgres + Auth)
     +-- Redis
     +-- RabbitMQ
-    +-- Keycloak
 
 ---
 
@@ -42,9 +41,9 @@ Isso sobe os seguintes serviços:
 | Frontend | http://localhost:3000 | Aplicação React/Vite |
 | API .NET | http://localhost:5283/swagger | Backend financeiro |
 | RabbitMQ UI | http://localhost:15672 | Gerenciamento do broker |
-| Keycloak | http://localhost:8080 | Autenticação / JWT |
-| SQL Server | localhost:1433 | Banco principal |
 | Redis | localhost:6379 | Cache |
+
+Autenticação e banco de dados são providos pelo Supabase (projeto hospedado, não roda em container local).
 
 ---
 
@@ -53,22 +52,14 @@ Isso sobe os seguintes serviços:
 - RabbitMQ:
   - usuário: `guest`
   - senha: `guest`
-- Keycloak:
-  - usuário: `admin`
-  - senha: `admin`
 
 ---
 
-## 3. Configurar o Keycloak
+## 3. Configurar o Supabase Auth
 
-1. Acesse http://localhost:8080
-2. Faça login com `admin` / `admin`
-3. Crie um realm chamado `Financeiro`
-4. Crie um client chamado `financeiro-api`
-   - Client authentication: `ON`
-   - Valid redirect URIs: `http://localhost:3000/*`
-   - Web origins: `http://localhost:3000`
-5. Crie um usuário de teste e defina uma senha
+1. Defina em `Financeiro.Web/.env` as chaves `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` do projeto Supabase.
+2. Defina em `Financeiro.Api/appsettings.Development.json` a seção `Supabase:Url` com a mesma URL do projeto.
+3. Crie um usuário de teste via tela de cadastro do app ou pelo dashboard do Supabase (Authentication > Users).
 
 ---
 

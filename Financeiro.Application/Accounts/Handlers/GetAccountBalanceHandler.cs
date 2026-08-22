@@ -21,7 +21,7 @@ public class GetAccountBalanceHandler : IRequestHandler<GetAccountBalanceQuery, 
 
     public async Task<decimal> Handle(GetAccountBalanceQuery request, CancellationToken cancellationToken)
     {
-        // 1. IMPORTANTE: Primeiro, garantimos que o usuário tenha uma conta vinculada ao seu UserId do Keycloak
+        // 1. IMPORTANTE: Primeiro, garantimos que o usuário tenha uma conta vinculada ao seu UserId do Supabase Auth
         // No request, agora passamos o UserId vindo do Token.
         var account = await _context.Accounts
             .FirstOrDefaultAsync(a => a.UserId == request.UserId, cancellationToken);

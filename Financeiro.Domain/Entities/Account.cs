@@ -7,7 +7,7 @@ public class Account : BaseEntity
     public decimal Balance { get;  set; }
     public string Currency { get; set; } = "BRL";
     
-    // Relacionamento com o usuário do Keycloak (Subject ID)
+    // Relacionamento com o usuário do Supabase Auth (Subject ID)
     public Guid UserId { get; set; } 
 
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();

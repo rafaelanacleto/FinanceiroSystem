@@ -80,7 +80,7 @@ public class AccountsController : ControllerBase
     [HttpGet("summary")]
     public async Task<IActionResult> GetSummary([FromQuery] int month, [FromQuery] int year)
     {
-        // 1. Pega o ID do usuário do Token do Keycloak
+        // 1. Pega o ID do usuário do Token do Supabase Auth
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
 

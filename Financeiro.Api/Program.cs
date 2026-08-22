@@ -19,21 +19,18 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 });
+var supabaseUrl = builder.Configuration["Supabase:Url"];
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = builder.Configuration["Keycloak:BaseUrl"];
-        options.Audience = builder.Configuration["Keycloak:ClientId"];
+        options.Authority = $"{supabaseUrl}/auth/v1";
+        options.Audience = "authenticated";
         options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuers = new[]
-            {
-                builder.Configuration["Keycloak:BaseUrl"],
-                "http://localhost:8080/realms/Financeiro"
-            },
-            ValidateAudience = false,
+            ValidIssuer = $"{supabaseUrl}/auth/v1",
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
         };

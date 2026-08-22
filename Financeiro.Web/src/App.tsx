@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from './context/AuthContext';
 
 // Importação dos seus Componentes
 import { BalanceCard } from './components/BalanceCard';
@@ -12,12 +12,13 @@ import { DateFilter } from './components/DateFilter';
 import { FinancialTrends } from './components/FinancialTrends';
 import { EvolutionChart } from './components/EvolutionChart';
 import { NotificationCenter } from './components/NotificationCenter';
+import { LoginForm } from './components/LoginForm';
 
 type Page = 'dashboard' | 'relatorios' | 'configuracoes' | 'perfil' | 'ajuda';
 type ThemeMode = 'light' | 'dark';
 
 export function App() {
-  const { keycloak, initialized } = useKeycloak();
+  const { user, initialized, signOut } = useAuth();
 
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -29,7 +30,7 @@ export function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
 
-  const userName = keycloak?.tokenParsed?.given_name || "Usuário";
+  const userName = user?.user_metadata?.full_name || user?.email || "Usuário";
 
   const handleTransactionCreated = () => {
     setIsModalOpen(false);
@@ -48,6 +49,10 @@ export function App() {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
       </div>
     );
+  }
+
+  if (!user) {
+    return <LoginForm />;
   }
 
   return (
@@ -90,7 +95,7 @@ export function App() {
           <div className="flex items-center gap-4">
             <NotificationCenter />
             <button
-              onClick={() => keycloak.logout()}
+              onClick={() => signOut()}
               className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors"
             >
               Sair da conta
