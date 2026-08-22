@@ -52,7 +52,7 @@ export function FinancialChart({ month, year }: { month: number, year: number })
         <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Por Categoria</p>
       </div>
 
-      <div className="flex-1 min-h-[300px] mt-4">
+      <div className="h-[350px] min-h-[350px] mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

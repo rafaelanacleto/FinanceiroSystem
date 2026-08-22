@@ -63,8 +63,16 @@ builder.Services.AddCors(options =>
         }
         else
         {
+            var allowedOriginsSection = builder.Configuration.GetSection("Cors:AllowedOrigins");
+            var allowedOrigins = allowedOriginsSection.GetChildren()
+                .Select(origin => origin.Value)
+                .Append(allowedOriginsSection.Value)
+                .Where(origin => !string.IsNullOrWhiteSpace(origin))
+                .Select(origin => origin!.Trim())
+                .ToArray() ?? [];
+
             corsBuilder
-                .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+                .WithOrigins(allowedOrigins)
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         }
