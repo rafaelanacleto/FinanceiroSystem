@@ -1,8 +1,11 @@
 using Financeiro.Api;
 using Financeiro.Application.Common.Interfaces;
+using Financeiro.Domain.Exceptions;
 using Financeiro.Infrastructure.Data;
 using Financeiro.Infrastructure.BackgroundServices;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -80,6 +83,40 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var feature = context.Features.Get<IExceptionHandlerFeature>();
+        var exception = feature?.Error;
+
+        var logger = context.RequestServices
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("GlobalExceptionHandler");
+
+        logger.LogError(exception, "Unhandled exception while processing {Method} {Path}", context.Request.Method, context.Request.Path);
+
+        var (statusCode, title) = exception switch
+        {
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
+            ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden"),
+            NotFoundException => (StatusCodes.Status404NotFound, "Not Found"),
+            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")
+        };
+
+        context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/problem+json";
+
+        await context.Response.WriteAsJsonAsync(new ProblemDetails
+        {
+            Title = title,
+            Status = statusCode,
+            Detail = app.Environment.IsDevelopment() ? exception?.Message : null,
+            Instance = context.Request.Path
+        });
+    });
+});
 
 if (app.Environment.IsDevelopment())
 {

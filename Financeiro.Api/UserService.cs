@@ -13,8 +13,12 @@ public class UserService : IUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public string GetUserId()
-        => _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    public string? GetUserId()
+    {
+        var user = _httpContextAccessor.HttpContext?.User;
+        return user?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? user?.FindFirst("sub")?.Value;
+    }
 
     public string GetUserName()
     {

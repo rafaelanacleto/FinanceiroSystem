@@ -41,13 +41,8 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand
         if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
             throw new UnauthorizedAccessException("Usuário não identificado.");
 
-
-        // 2. CONVERSÃO CRUCIAL: Transformamos a string em Guid para o SQL entender
-        if (!Guid.TryParse(userId, out Guid userGuidNew))
-            throw new UnauthorizedAccessException("ID de usuário inválido.");            
-
         var account = await _context.Accounts
-            .FirstOrDefaultAsync(a => a.UserId == userGuidNew, cancellationToken);
+            .FirstOrDefaultAsync(a => a.UserId == userGuid, cancellationToken);
 
         if (account == null)
         {
@@ -83,7 +78,15 @@ public class CreateTransactionHandler : IRequestHandler<CreateTransactionCommand
         // Dispara o evento de transação criada
         await _mediator.Publish(new Financeiro.Domain.Event.TransactionCreatedEvent(transaction.Id, account.Id, transaction.Amount, transaction.TransactionDate), cancellationToken);
 
-        await _cache.RemoveAsync(CacheKeys.AccountBalance(account.Id), cancellationToken);
+        try
+        {
+            await _cache.RemoveAsync(CacheKeys.AccountBalance(account.Id), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Cache is best-effort: transaction should still succeed when Redis is unavailable.
+            _logger.LogWarning(ex, "Falha ao invalidar cache de saldo para a conta {AccountId}", account.Id);
+        }
 
         _logger.LogInformation("Transação confirmada para o usuário {UserId} na conta {AccountId}", userId, account.Id);
 
