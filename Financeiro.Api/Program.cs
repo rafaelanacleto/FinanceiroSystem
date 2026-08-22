@@ -73,10 +73,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
-// E logo abaixo de app.UseRouting():
-app.UseCors("DefaultPolicy");
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
