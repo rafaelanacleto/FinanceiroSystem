@@ -99,13 +99,13 @@ export function NewTransactionModal({ onClose, onTransactionCreated, transaction
   return (
     // CAMADA 1: BACKDROP (Fundo escuro)
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"
       onClick={onClose} // Fecha se clicar fora do card branco
     >
       
       {/* CAMADA 2: O CARD DO MODAL */}
       <div 
-        className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 relative animate-in fade-in zoom-in duration-300"
+        className="bg-white w-full max-w-md my-3 sm:my-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-8 relative animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()} // Impede que o clique dentro do formulário feche o modal
       >
         
@@ -153,7 +153,7 @@ export function NewTransactionModal({ onClose, onTransactionCreated, transaction
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1 block">Valor (R$)</label>
                 <input

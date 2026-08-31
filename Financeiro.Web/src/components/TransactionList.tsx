@@ -231,7 +231,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
           </button>
         </div>
 
-        <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+        <div className="mt-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
           <span>{filteredTransactions.length} registro(s) exibidos</span>
           {(searchText || selectedType !== 'all' || selectedCategory !== 'all') && (
             <span>Filtros ativos</span>
@@ -239,7 +239,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
         </div>
       </div>
 
-      <div className="flex justify-between items-center px-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center px-2">
         <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Extrato Detalhado</h3>
 
         <div className="flex gap-2">
@@ -259,7 +259,41 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
       </div>
 
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-        <table className="w-full text-left border-collapse">
+        <div className="md:hidden divide-y divide-slate-100">
+          {paginatedTransactions.map((transaction) => (
+            <article key={transaction.id} className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 shrink-0 rounded-2xl bg-slate-50 flex items-center justify-center text-lg shadow-sm">
+                  {CATEGORIES.find(c => c.id === transaction.category)?.icon || '🏷️'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-black text-slate-700 break-words leading-tight">{transaction.description}</p>
+                  <p className="mt-1 text-[10px] font-black text-slate-400 uppercase tracking-wider break-words">{transaction.category}</p>
+                  <p className="mt-2 text-xs font-bold text-slate-400">{new Date(transaction.createdAt).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <p className={`shrink-0 text-right font-black text-sm ${transaction.type === 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                  {transaction.type === 0 ? '+' : '-'} {transaction.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </p>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => onEdit(transaction)}
+                  className="min-h-11 rounded-xl bg-blue-50 px-3 text-xs font-black text-blue-600 hover:bg-blue-100 transition-colors"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleDelete(transaction.id)}
+                  className="min-h-11 rounded-xl bg-red-50 px-3 text-xs font-black text-red-600 hover:bg-red-100 transition-colors"
+                >
+                  Excluir
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <table className="hidden md:table w-full text-left border-collapse">
           <thead className="bg-slate-50/50 border-b border-slate-100">
             <tr>
               <th className="px-6 py-5 text-[10px] font-black uppercase text-slate-400">Descrição</th>
@@ -324,11 +358,11 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
         )}
 
         {filteredTransactions.length > ITEMS_PER_PAGE && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-4 border-t border-slate-100">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Página {currentPage} de {totalPages} &mdash; {filteredTransactions.length} registros
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}

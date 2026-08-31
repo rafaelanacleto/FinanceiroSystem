@@ -131,7 +131,7 @@ export function NotificationCenter() {
 
       {/* Dropdown Card */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl border border-slate-100 dark:border-slate-700/60 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl shadow-slate-200/50 dark:shadow-none z-50 overflow-hidden transform origin-top-right transition-all duration-200">
+        <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] max-w-96 rounded-2xl border border-slate-100 dark:border-slate-700/60 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl shadow-slate-200/50 dark:shadow-none z-50 overflow-hidden transform origin-top-right transition-all duration-200">
           {/* Header */}
           <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -177,7 +177,7 @@ export function NotificationCenter() {
           </div>
 
           {/* List Area */}
-          <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
+          <div className="max-h-[min(20rem,calc(100vh-12rem))] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
             {displayedNotifications.length === 0 ? (
               <div className="p-8 text-center text-slate-400 dark:text-slate-500">
                 <Bell className="w-12 h-12 mx-auto mb-2 text-slate-300 dark:text-slate-700" />

@@ -1,4 +1,33 @@
-# React + TypeScript + Vite
+# Financeiro.Web
+
+## Configuracao local
+
+Antes de iniciar o Vite, crie `Financeiro.Web/.env` a partir de `.env.example`:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Preencha o arquivo criado:
+
+```dotenv
+VITE_SUPABASE_URL=https://itfeskmvfohhfoupqqqz.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase
+VITE_API_BASE_URL=http://localhost:5283/api
+```
+
+Obtenha `VITE_SUPABASE_ANON_KEY` no dashboard do Supabase, em **Project Settings > API**, usando a chave publica `anon` (ou uma chave publica publicavel equivalente). Nao use `service_role` no frontend.
+
+O arquivo `.env` e ignorado pelo Git para que as credenciais locais nao sejam versionadas. Sempre reinicie `npm run dev` depois de alterar variaveis `VITE_*`.
+
+## Executar
+
+```powershell
+npm install
+npm run dev
+```
+
+## Referencia do template
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

@@ -30,7 +30,7 @@ export function EvolutionChart({ currentMonth, currentYear }: EvolutionChartProp
   const expensePath = monthlyData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.expense)}`).join(' ');
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mt-6">
+    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6 mt-5 sm:mt-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h4 className="text-sm font-black text-slate-800 tracking-tight uppercase">

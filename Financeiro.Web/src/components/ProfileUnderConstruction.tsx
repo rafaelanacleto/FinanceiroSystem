@@ -1,6 +1,6 @@
 export function ProfileUnderConstruction() {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-20 px-4 bg-white rounded-3xl border border-slate-100 shadow-sm max-w-2xl mx-auto">
+    <div className="flex flex-col items-center justify-center text-center py-12 sm:py-20 px-4 bg-white rounded-3xl border border-slate-100 shadow-sm max-w-2xl mx-auto">
       <div className="relative mb-6">
         {/* Círculo de fundo pulsante */}
         <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75 scale-75"></div>
@@ -11,7 +11,7 @@ export function ProfileUnderConstruction() {
         </div>
       </div>
 
-      <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+      <h3 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
         Página de Perfil em Construção
       </h3>
       

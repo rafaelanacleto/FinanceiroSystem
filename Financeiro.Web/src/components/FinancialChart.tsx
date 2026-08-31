@@ -46,13 +46,13 @@ export function FinancialChart({ month, year }: { month: number, year: number })
   if (loading) return <div className="h-[350px] flex items-center justify-center text-slate-400">Carregando análise...</div>;
 
   return (
-    <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm h-full flex flex-col">
+    <div className="bg-white p-5 sm:p-8 rounded-3xl border border-slate-100 shadow-sm h-full flex flex-col">
       <div>
         <h3 className="text-xl font-bold text-slate-800 tracking-tight">Análise de Gastos</h3>
         <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1">Por Categoria</p>
       </div>
 
-      <div className="h-[350px] min-h-[350px] mt-4">
+      <div className="h-[270px] min-h-[270px] sm:h-[350px] sm:min-h-[350px] mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

@@ -31,8 +31,8 @@ export function LoginForm() {
   };
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-slate-50">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-4">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-5 sm:p-8">
         <div className="flex items-center gap-2 justify-center mb-6">
           <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xl">F</div>
           <span className="text-xl font-black text-slate-800 tracking-tighter">FinanceiroPro</span>

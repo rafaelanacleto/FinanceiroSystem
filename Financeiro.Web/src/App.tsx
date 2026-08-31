@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 
 // Importação dos seus Componentes
@@ -29,6 +30,7 @@ export function App() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const userName = user?.user_metadata?.full_name || user?.email || "Usuário";
 
@@ -43,6 +45,14 @@ export function App() {
     localStorage.setItem('financeiro-theme', theme);
   }, [theme]);
 
+  const mobileNavigation = [
+    ['dashboard', 'Dashboard'],
+    ['relatorios', 'Relatórios'],
+    ['configuracoes', 'Configurações'],
+    ['perfil', 'Perfil'],
+    ['ajuda', 'Ajuda'],
+  ] as const;
+
   if (!initialized) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-slate-50">
@@ -56,16 +66,16 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+    <div className="min-h-screen bg-[#F8FAFC] pb-10 sm:pb-20">
       {/* Substitua sua <nav> por esta */}
-      <nav className="bg-white border-b border-slate-100 mb-8">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+      <nav className="relative bg-white border-b border-slate-100 mb-5 sm:mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 min-h-16 sm:h-20 flex items-center justify-between gap-3">
+          <div className="flex items-center min-w-0 gap-8">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-200">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-200">
                 F
               </div>
-              <span className="text-xl font-black text-slate-800 tracking-tighter">FinanceiroPro</span>
+              <span className="text-base sm:text-xl font-black text-slate-800 tracking-tighter truncate">FinanceiroPro</span>
             </div>
 
             <div className="hidden md:flex items-center gap-4">
@@ -92,31 +102,66 @@ export function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center shrink-0 gap-2 sm:gap-4">
             <NotificationCenter />
             <button
               onClick={() => signOut()}
-              className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors"
+              className="hidden md:block text-sm font-bold text-slate-400 hover:text-red-500 transition-colors whitespace-nowrap"
             >
               Sair da conta
             </button>
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
+              className="md:hidden w-11 h-11 inline-flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+              aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
+
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute inset-x-0 top-full z-40 border-y border-slate-100 bg-white shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 py-3 grid gap-1">
+              {mobileNavigation.map(([page, label]) => (
+                <button
+                  key={page}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`min-h-11 rounded-xl px-4 text-left text-sm font-bold transition-colors ${currentPage === page ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => signOut()}
+                className="min-h-11 mt-2 rounded-xl border border-red-100 px-4 text-left text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Sair da conta
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6">
 
         {/* CABEÇALHO COM FILTRO DE DATA */}
         {currentPage !== 'configuracoes' && (
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 sm:gap-6 mb-6 sm:mb-10">
             <div>
-              <h2 className="text-4xl font-black text-slate-800 tracking-tight">Olá, {userName}! 👋</h2>
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight break-words">Olá, {userName}! 👋</h2>
               <p className="text-slate-500 font-medium mt-1">
                 Gerencie suas finanças de <span className="text-emerald-600 font-bold">{selectedMonth}/{selectedYear}</span>
               </p>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3 sm:gap-4">
               {/* COMPONENTE DE FILTRO QUE CRIAMOS */}
               <DateFilter
                 month={selectedMonth}
@@ -129,7 +174,7 @@ export function App() {
 
               <button
                 onClick={() => setIsModalOpen(true)} // Apenas abre o modal
-                className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
+                className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center justify-center gap-2 whitespace-nowrap"
               >
                 <span className="text-xl">+</span> Nova Transação
               </button>
@@ -139,7 +184,7 @@ export function App() {
 
         {/* GRID DO DASHBOARD */}
         {currentPage === 'dashboard' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8">
 
             {/* COLUNA DA ESQUERDA (SALDO) */}
             <div className="lg:col-span-5 flex flex-col">

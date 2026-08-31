@@ -23,8 +23,8 @@ export function FinancialTrends({ month, year }: FinancialTrendsProps) {
     <div className="space-y-6 mt-6">
       
       {/* 1. CARD DE DISTRIBUIÇÃO E COMPARAÇÃO */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
           <h4 className="text-sm font-black text-slate-800 tracking-tight uppercase">
             Perfil de Gastos ({month}/{year})
           </h4>
@@ -73,7 +73,7 @@ export function FinancialTrends({ month, year }: FinancialTrendsProps) {
       </div>
 
       {/* 2. CARD DE META DE ECONOMIA */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6">
         <div className="flex items-center justify-between mb-2">
           <div>
             <h4 className="text-sm font-black text-slate-800 tracking-tight uppercase">

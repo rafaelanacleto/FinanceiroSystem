@@ -45,11 +45,11 @@ export function HelpMenu() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-12 text-slate-800">
+    <div className="max-w-5xl mx-auto py-2 sm:p-6 space-y-8 sm:space-y-12 text-slate-800">
 
       {/* TÍTULO DA PÁGINA */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Como podemos ajudar?</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Como podemos ajudar?</h1>
         <p className="mt-2 text-slate-500">Tire suas dúvidas sobre o funcionamento do FinanceiroPro e veja como otimizar seu controle.</p>
       </div>
 
@@ -57,7 +57,7 @@ export function HelpMenu() {
       <section className="space-y-6">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
           <BookOpen className="w-6 h-6 text-emerald-600" />
-          <h2 className="text-2xl font-bold text-slate-900">Primeiros Passos</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Primeiros Passos</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -99,7 +99,7 @@ export function HelpMenu() {
       <section className="space-y-6">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
           <HelpCircle className="w-6 h-6 text-emerald-600" />
-          <h2 className="text-2xl font-bold text-slate-900">Perguntas Frequentes (FAQ)</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Perguntas Frequentes (FAQ)</h2>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100/80 divide-y divide-slate-100 overflow-hidden">
@@ -115,11 +115,11 @@ export function HelpMenu() {
                 }}
                 className="w-full flex items-center justify-between p-5 text-left font-medium text-slate-800 hover:bg-slate-50/50 transition-colors"
               >
-                <span>{item.question}</span>
+                <span className="pr-3">{item.question}</span>
                 {openFaq[index] ? (
-                  <ChevronUp className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
+                  <ChevronUp className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-slate-600" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
+                  <ChevronDown className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-slate-600" />
                 )}
               </button>
               {openFaq[index] && (
@@ -139,7 +139,7 @@ export function HelpMenu() {
         <section className="space-y-6">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <Keyboard className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-2xl font-bold text-slate-900">Atalhos de Teclado</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Atalhos de Teclado</h2>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100/80 space-y-4">
@@ -161,7 +161,7 @@ export function HelpMenu() {
         <section className="space-y-6">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <MessageSquare className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-2xl font-bold text-slate-900">Suporte e Feedback</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Suporte e Feedback</h2>
           </div>
 
           <div className="grid grid-cols-1 gap-4">

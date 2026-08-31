@@ -35,11 +35,11 @@ export function DateFilter({ month, year, onChange }: DateFilterProps) {
   };
 
   return (
-    <div className="flex items-center gap-2 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
+    <div className="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-2 bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm">
       <select
         value={month}
         onChange={handleMonthChange}
-        className="bg-transparent text-sm font-bold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+        className="min-w-0 flex-1 sm:flex-none bg-transparent text-sm font-bold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
       >
         {MONTHS.map((m) => (
           <option key={m.value} value={m.value}>
@@ -53,7 +53,7 @@ export function DateFilter({ month, year, onChange }: DateFilterProps) {
       <select
         value={year}
         onChange={handleYearChange}
-        className="bg-transparent text-sm font-bold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+        className="min-w-0 flex-1 sm:flex-none bg-transparent text-sm font-bold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
       >
         {YEARS.map((y) => (
           <option key={y} value={y}>
