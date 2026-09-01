@@ -1,11 +1,11 @@
 {
   "name": "financeiro-web",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "node scripts/generate-release-info.mjs && vite",
+    "build": "node scripts/generate-release-info.mjs --increment && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
