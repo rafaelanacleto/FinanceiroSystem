@@ -1,33 +1,96 @@
+import { useEffect, useState } from 'react';
+import api from '../services/api';
+
 interface EvolutionChartProps {
   currentMonth: number;
   currentYear: number;
 }
 
-export function EvolutionChart({ currentMonth, currentYear }: EvolutionChartProps) {
-  // Simulando histórico dos últimos 6 meses com base no mês/ano atual
-  const monthlyData = [
-    { label: 'Fev', income: 4200, expense: 3100 },
-    { label: 'Mar', income: 4500, expense: 3800 },
-    { label: 'Abr', income: 4100, expense: 2900 },
-    { label: 'Mai', income: 5200, expense: 3500 },
-    { label: 'Jun', income: 4900, expense: 4100 },
-    { label: 'Jul', income: 5500, expense: 3400 },
-  ];
+interface MonthlyEvolutionResponse {
+  month: number;
+  year: number;
+  totalIncome: number;
+  totalExpenses: number;
+  balance: number;
+}
 
-  // Configurações para mapeamento do SVG dinâmico
+interface MonthlyData {
+  label: string;
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+});
+
+const monthFormatter = new Intl.DateTimeFormat('pt-BR', { month: 'short' });
+
+function formatMonthLabel(month: number, year: number) {
+  const label = monthFormatter.format(new Date(year, month - 1, 1)).replace('.', '');
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+export function EvolutionChart({ currentMonth, currentYear }: Readonly<EvolutionChartProps>) {
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadEvolution() {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const response = await api.get<MonthlyEvolutionResponse[]>('/Accounts/evolution', {
+          params: { month: currentMonth, year: currentYear },
+          signal: controller.signal,
+        });
+
+        setMonthlyData(response.data.map((item) => ({
+          label: formatMonthLabel(item.month, item.year),
+          income: item.totalIncome,
+          expense: item.totalExpenses,
+          balance: item.balance,
+        })));
+      } catch {
+        if (!controller.signal.aborted) {
+          setErrorMessage('Não foi possível carregar a evolução financeira.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadEvolution();
+    return () => controller.abort();
+  }, [currentMonth, currentYear]);
+
   const width = 500;
   const height = 180;
   const padding = 40;
+  const values = monthlyData.flatMap((data) => [data.income, data.expense, data.balance]);
+  const minimumAmount = Math.min(0, ...values);
+  const maximumAmount = Math.max(0, ...values);
+  const amountRange = maximumAmount - minimumAmount || 1;
+  const hasTransactions = monthlyData.some((data) =>
+    data.income !== 0 || data.expense !== 0 || data.balance !== 0,
+  );
 
-  const maxAmount = Math.max(...monthlyData.flatMap(d => [d.income, d.expense])) * 1.1;
-
-  // Função auxiliar para converter valores financeiros em coordenadas Y do SVG
   const getX = (index: number) => padding + (index * (width - padding * 2)) / (monthlyData.length - 1);
-  const getY = (amount: number) => height - padding - ((amount / maxAmount) * (height - padding * 2));
+  const getY = (amount: number) => height - padding - (((amount - minimumAmount) / amountRange) * (height - padding * 2));
+  const getPath = (value: keyof Pick<MonthlyData, 'income' | 'expense' | 'balance'>) =>
+    monthlyData.map((data, index) => `${index === 0 ? 'M' : 'L'} ${getX(index)} ${getY(data[value])}`).join(' ');
 
-  // Gerando as strings de caminhos (path) para as linhas do gráfico
-  const incomePath = monthlyData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.income)}`).join(' ');
-  const expensePath = monthlyData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.expense)}`).join(' ');
+  const incomePath = getPath('income');
+  const expensePath = getPath('expense');
+  const balancePath = getPath('balance');
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6 mt-5 sm:mt-6">
@@ -37,12 +100,11 @@ export function EvolutionChart({ currentMonth, currentYear }: EvolutionChartProp
             Evolução Temporal
           </h4>
           <p className="text-xs text-slate-400 font-medium mt-0.5">
-            Análise de fluxo de caixa dos últimos 6 meses ({currentMonth}/{currentYear})
+            Fluxo de caixa dos últimos 6 meses até {currentMonth}/{currentYear}
           </p>
         </div>
 
-        {/* Legendas customizadas */}
-        <div className="flex items-center gap-4 text-xs font-bold">
+        <div className="flex flex-wrap items-center gap-4 text-xs font-bold">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-0.5 bg-emerald-500 rounded-full" />
             <span className="text-slate-600">Receitas</span>
@@ -51,112 +113,84 @@ export function EvolutionChart({ currentMonth, currentYear }: EvolutionChartProp
             <span className="w-3 h-0.5 bg-rose-500 rounded-full" />
             <span className="text-slate-600">Despesas</span>
           </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-0.5 bg-sky-500 rounded-full" />
+            <span className="text-slate-600">Saldo</span>
+          </div>
         </div>
       </div>
 
-      {/* Área do Gráfico em SVG */}
-      <div className="w-full overflow-hidden">
-        <svg 
-          viewBox={`0 0 ${width} ${height}`} 
-          className="w-full h-auto overflow-visible"
-        >
-          {/* Linhas de Grade de Fundo (Y) */}
-          {[0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-            const yVal = height - padding - (ratio * (height - padding * 2));
-            return (
-              <line
-                key={idx}
-                x1={padding}
-                y1={yVal}
-                x2={width - padding}
-                y2={yVal}
-                stroke="#F1F5F9"
-                strokeWidth="1"
-                strokeDasharray="4 4"
-              />
-            );
-          })}
+      {isLoading && (
+        <div className="h-[180px] flex items-center justify-center text-sm font-medium text-slate-400">
+          Carregando evolução financeira...
+        </div>
+      )}
 
-          {/* Linha de Receitas (Glow + Linha Principal) */}
-          <path
-            d={incomePath}
-            fill="none"
-            stroke="#10B981"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="drop-shadow-[0_2px_4px_rgba(16,185,129,0.2)]"
-          />
+      {errorMessage && !isLoading && (
+        <div className="h-[180px] flex items-center justify-center text-center text-sm font-medium text-rose-500">
+          {errorMessage}
+        </div>
+      )}
 
-          {/* Linha de Despesas (Glow + Linha Principal) */}
-          <path
-            d={expensePath}
-            fill="none"
-            stroke="#F43F5E"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="drop-shadow-[0_2px_4px_rgba(244,63,94,0.2)]"
-          />
+      {!isLoading && !errorMessage && !hasTransactions && (
+        <div className="h-[180px] flex items-center justify-center text-sm font-medium text-slate-400">
+          Nenhuma movimentação registrada neste período.
+        </div>
+      )}
 
-          {/* Pontos de Interação das Receitas */}
-          {monthlyData.map((d, i) => (
-            <g key={`inc-${i}`} className="group/node cursor-pointer">
-              <circle
-                cx={getX(i)}
-                cy={getY(d.income)}
-                r="4"
-                fill="#FFFFFF"
-                stroke="#10B981"
-                strokeWidth="2.5"
-              />
-              <circle
-                cx={getX(i)}
-                cy={getY(d.income)}
-                r="8"
-                fill="#10B981"
-                className="opacity-0 group-hover/node:opacity-10 transition-opacity"
-              />
-              <title>{`Receita: R$ ${d.income}`}</title>
-            </g>
-          ))}
+      {!isLoading && !errorMessage && hasTransactions && (
+        <div className="w-full overflow-hidden">
+          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
+            {[0.25, 0.5, 0.75, 1].map((ratio) => {
+              const yValue = height - padding - (ratio * (height - padding * 2));
+              return (
+                <line
+                  key={ratio}
+                  x1={padding}
+                  y1={yValue}
+                  x2={width - padding}
+                  y2={yValue}
+                  stroke="#F1F5F9"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
+                />
+              );
+            })}
 
-          {/* Pontos de Interação das Despesas */}
-          {monthlyData.map((d, i) => (
-            <g key={`exp-${i}`} className="group/node cursor-pointer">
-              <circle
-                cx={getX(i)}
-                cy={getY(d.expense)}
-                r="4"
-                fill="#FFFFFF"
-                stroke="#F43F5E"
-                strokeWidth="2.5"
-              />
-              <circle
-                cx={getX(i)}
-                cy={getY(d.expense)}
-                r="8"
-                fill="#F43F5E"
-                className="opacity-0 group-hover/node:opacity-10 transition-opacity"
-              />
-              <title>{`Despesa: R$ ${d.expense}`}</title>
-            </g>
-          ))}
+            <path d={incomePath} fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={expensePath} fill="none" stroke="#F43F5E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={balancePath} fill="none" stroke="#0EA5E9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* Eixo X - Rótulos dos Meses */}
-          {monthlyData.map((d, i) => (
-            <text
-              key={`label-${i}`}
-              x={getX(i)}
-              y={height - 12}
-              textAnchor="middle"
-              className="text-[10px] font-bold fill-slate-400 font-sans"
-            >
-              {d.label}
-            </text>
-          ))}
-        </svg>
-      </div>
+            {monthlyData.map((data, index) => (
+              <g key={data.label} className="group/node cursor-pointer">
+                {([
+                  ['income', '#10B981', 'Receita'],
+                  ['expense', '#F43F5E', 'Despesa'],
+                  ['balance', '#0EA5E9', 'Saldo'],
+                ] as const).map(([value, color, name]) => (
+                  <g key={value}>
+                    <circle cx={getX(index)} cy={getY(data[value])} r="4" fill="#FFFFFF" stroke={color} strokeWidth="2.5" />
+                    <circle cx={getX(index)} cy={getY(data[value])} r="8" fill={color} className="opacity-0 group-hover/node:opacity-10 transition-opacity" />
+                    <title>{`${name}: ${currencyFormatter.format(data[value])}`}</title>
+                  </g>
+                ))}
+              </g>
+            ))}
+
+            {monthlyData.map((data, index) => (
+              <text
+                key={`label-${data.label}`}
+                x={getX(index)}
+                y={height - 12}
+                textAnchor="middle"
+                className="text-[10px] font-bold fill-slate-400 font-sans"
+              >
+                {data.label}
+              </text>
+            ))}
+          </svg>
+        </div>
+      )}
     </div>
   );
 }

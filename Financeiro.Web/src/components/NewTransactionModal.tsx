@@ -39,7 +39,7 @@ export const CATEGORIES = [
   { id: 'Taxas Bancárias', icon: '🏦', color: 'bg-slate-200 text-slate-800' },
 ];
 
-export function NewTransactionModal({ onClose, onTransactionCreated, transactionToEdit }: NewTransactionModalProps) {
+export function NewTransactionModal({ onClose, onTransactionCreated, transactionToEdit }: Readonly<NewTransactionModalProps>) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Outros');
@@ -99,13 +99,13 @@ export function NewTransactionModal({ onClose, onTransactionCreated, transaction
   return (
     // CAMADA 1: BACKDROP (Fundo escuro)
     <div 
-      className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"
       onClick={onClose} // Fecha se clicar fora do card branco
     >
       
       {/* CAMADA 2: O CARD DO MODAL */}
       <div 
-        className="bg-white w-full max-w-md my-3 sm:my-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-8 relative animate-in fade-in zoom-in duration-300"
+        className="bg-white w-full max-w-md max-h-full overflow-y-auto rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-8 relative animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()} // Impede que o clique dentro do formulário feche o modal
       >
         

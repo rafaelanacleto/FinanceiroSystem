@@ -98,6 +98,24 @@ public class AccountsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("evolution")]
+    public async Task<IActionResult> GetEvolution([FromQuery] int month, [FromQuery] int year)
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+        var filterMonth = month == 0 ? DateTime.Now.Month : month;
+        var filterYear = year == 0 ? DateTime.Now.Year : year;
+
+        var result = await _mediator.Send(new GetMonthlyEvolutionQuery(
+            Guid.Parse(userIdClaim),
+            filterMonth,
+            filterYear
+        ));
+
+        return Ok(result);
+    }
+
     [HttpDelete("transactions/{id:guid}")]
     public async Task<IActionResult> DeleteTransaction(Guid id)
     {
