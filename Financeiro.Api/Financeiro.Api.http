@@ -1,6 +1,97 @@
-@Financeiro.Api_HostAddress = http://localhost:5283
+@HostAddress = http://localhost:5283
+@AuthToken = eyJhbGciOiJFUzI1NiIsImtpZCI6IjU1YzQxYjMzLTQwNzAtNDdmYy1iYzRkLTU0YmE3YzYyNDUxMSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2l0ZmVza212Zm9oaGZvdXBxcXF6LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJkMzFjNGVmNC1lOGQzLTQ3OGEtYWQ0ZC0xYWJlNGNkMzQ5YTQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzg4MzUzMTc0LCJpYXQiOjE3ODgzNDk1NzQsImVtYWlsIjoicmFmYWVsLmZlcnJlaXJhLmFuYWNsZXRvQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJyYWZhZWwuZmVycmVpcmEuYW5hY2xldG9AZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZ1bGxfbmFtZSI6IlJhZmFlbCBBbmFjbGV0byIsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiZDMxYzRlZjQtZThkMy00NzhhLWFkNGQtMWFiZTRjZDM0OWE0In0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3ODgzNDk1NzR9XSwic2Vzc2lvbl9pZCI6IjI2YTQxYjliLWQ4MzUtNDBhYy05MjZiLWQxNmQzNDJhM2YxYiIsImlzX2Fub255bW91cyI6ZmFsc2V9.pueyGyDwKYSjrUcwexT93XCOz_WlozUhTpeachuRNDpKO82MUGGEsV2ZuqOyEycrlOktdKRxurHQOj4mLxjsdQ
+@AccountId = COLE_O_ACCOUNT_ID_AQUI
+@TransactionId = COLE_O_TRANSACTION_ID_AQUI
 
-GET {{Financeiro.Api_HostAddress}}/weatherforecast/
+### Accounts - criar conta
+POST {{HostAddress}}/api/Accounts
+Authorization: Bearer {{AuthToken}}
+Content-Type: application/json
+
+{
+	"name": "Conta principal",
+	"description": "Conta corrente",
+	"currency": "BRL",
+	"userId": "00000000-0000-0000-0000-000000000000"
+}
+
+### Accounts - saldo atual
+GET {{HostAddress}}/api/Accounts/balance
+Authorization: Bearer {{AuthToken}}
 Accept: application/json
 
 ###
+### Accounts - transacoes do mes selecionado
+GET {{HostAddress}}/api/Accounts/transactions?month=7&year=2026
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+### Accounts - todas as transacoes (sem filtro de periodo)
+GET {{HostAddress}}/api/Accounts/transactions
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+### Accounts - resumo mensal
+GET {{HostAddress}}/api/Accounts/summary?month=9&year=2026
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+### Accounts - evolucao dos ultimos seis meses
+GET {{HostAddress}}/api/Accounts/evolution?month=9&year=2026
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+### Transactions - criar transacao
+POST {{HostAddress}}/api/Accounts/transactions
+Authorization: Bearer {{AuthToken}}
+Content-Type: application/json
+
+{
+	"description": "Supermercado",
+	"amount": 150.00,
+	"category": "Alimentacao",
+	"transactionDate": "2026-09-02T12:00:00Z",
+	"type": 1,
+	"accountId": "{{AccountId}}"
+}
+
+### Transactions - atualizar transacao
+PUT {{HostAddress}}/api/Accounts/transactions/{{TransactionId}}
+Authorization: Bearer {{AuthToken}}
+Content-Type: application/json
+
+{
+	"description": "Supermercado atualizado",
+	"amount": 175.00,
+	"category": "Alimentacao",
+	"transactionDate": "2026-09-02T12:00:00Z",
+	"type": 1
+}
+
+### Transactions - excluir transacao
+DELETE {{HostAddress}}/api/Accounts/transactions/{{TransactionId}}
+Authorization: Bearer {{AuthToken}}
+
+### Notifications - listar notificacoes
+GET {{HostAddress}}/api/Notifications
+Authorization: Bearer {{AuthToken}}
+Accept: application/json
+
+### Notifications - marcar notificacoes como lidas
+PUT {{HostAddress}}/api/Notifications/read
+Authorization: Bearer {{AuthToken}}
+Content-Type: application/json
+
+[
+	"00000000-0000-0000-0000-000000000000"
+]
+
+### Login SUPABASE
+POST https://itfeskmvfohhfoupqqqz.supabase.co/auth/v1/token?grant_type=password
+Content-Type: application/json
+apikey: sb_publishable_FEiMZuxrDnnVBEioj1cfBA_G_gJhc_3
+
+{
+  "email": "rafael.ferreira.anacleto@gmail.com",
+  "password": "Kja@2025!"
+}

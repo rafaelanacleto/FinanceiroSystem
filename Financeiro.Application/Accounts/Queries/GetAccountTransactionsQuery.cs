@@ -11,4 +11,8 @@ public record TransactionDto(
     DateTime CreatedAt
 );
 
-public record GetAccountTransactionsQuery(Guid UserId) : IRequest<List<TransactionDto>>;
+public record GetAccountTransactionsQuery(
+    Guid UserId,
+    int? Month = null,
+    int? Year = null
+) : IRequest<List<TransactionDto>>;

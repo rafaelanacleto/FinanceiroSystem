@@ -23,9 +23,20 @@ public class GetAccountTransactionsHandler : IRequestHandler<GetAccountTransacti
         if (account == null)
             return [];
 
-        return await _context.Transactions
+        var transactionsQuery = _context.Transactions
             .AsNoTracking()
-            .Where(t => t.AccountId == account.Id)
+            .Where(t => t.AccountId == account.Id);
+
+        if (request.Month.HasValue && request.Year.HasValue)
+        {
+            var startDate = new DateTime(request.Year.Value, request.Month.Value, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endDate = startDate.AddMonths(1);
+
+            transactionsQuery = transactionsQuery.Where(t =>
+                t.CreatedAt >= startDate && t.CreatedAt < endDate);
+        }
+
+        return await transactionsQuery
             .OrderByDescending(t => t.CreatedAt)
             .Select(t => new TransactionDto(
                 t.Id,

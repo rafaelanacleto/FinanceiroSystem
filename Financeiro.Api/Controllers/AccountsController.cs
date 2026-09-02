@@ -64,15 +64,20 @@ public class AccountsController : ControllerBase
         return Ok();
     }
 
-    // E o GET (que é o que o TransactionList chama) deve estar assim:
-    [HttpGet("transactions")] // <--- Verifique se este atributo está correto!
-    public async Task<IActionResult> GetTransactions()
+    [HttpGet("transactions")]
+    public async Task<IActionResult> GetTransactions([FromQuery] int? month, [FromQuery] int? year)
     {
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
 
+        if (month.HasValue != year.HasValue ||
+            (month.HasValue && (month.Value is < 1 or > 12 || year!.Value < 1)))
+        {
+            return BadRequest("Month and year must be provided together, with a month between 1 and 12 and a positive year.");
+        }
+
         var userId = Guid.Parse(userIdClaim);
-        var transactions = await _mediator.Send(new GetAccountTransactionsQuery(userId));
+        var transactions = await _mediator.Send(new GetAccountTransactionsQuery(userId, month, year));
         return Ok(transactions);
     }
 
