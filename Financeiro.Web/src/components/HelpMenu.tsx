@@ -49,15 +49,15 @@ export function HelpMenu() {
 
       {/* TÍTULO DA PÁGINA */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Como podemos ajudar?</h1>
-        <p className="mt-2 text-slate-500">Tire suas dúvidas sobre o funcionamento do FinanceiroPro e veja como otimizar seu controle.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Como podemos ajudar?</h1>
+        <p className="mt-2 text-slate-500 dark:text-slate-300">Tire suas dúvidas sobre o funcionamento do FinanceiroPro e veja como otimizar seu controle.</p>
       </div>
 
       {/* SEÇÃO 1: PRIMEIROS PASSOS */}
       <section className="space-y-6">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
           <BookOpen className="w-6 h-6 text-emerald-600" />
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Primeiros Passos</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Primeiros Passos</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -65,32 +65,32 @@ export function HelpMenu() {
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold mb-4 text-sm">
               1
             </span>
-            <h3 className="font-semibold text-slate-900 mb-2">Configure Categorias</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">Defina seus limites de gastos e personalize as tags de categorias no menu de configurações.</p>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Configure Categorias</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-300 leading-relaxed">Defina seus limites de gastos e personalize as tags de categorias no menu de configurações.</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100/80 hover:shadow-md transition-shadow">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold mb-4 text-sm">
               2
             </span>
-            <h3 className="font-semibold text-slate-900 mb-2">Saldo Inicial</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">Cadastre seu saldo inicial através de um lançamento de receita para começar seu histórico de forma correta.</p>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Saldo Inicial</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-300 leading-relaxed">Cadastre seu saldo inicial através de um lançamento de receita para começar seu histórico de forma correta.</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100/80 hover:shadow-md transition-shadow">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold mb-4 text-sm">
               3
             </span>
-            <h3 className="font-semibold text-slate-900 mb-2">Lance Diariamente</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">Use o botão <strong className="text-emerald-600 font-medium">+ Nova Transação</strong> para registrar receitas ou despesas assim que elas ocorrerem.</p>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Lance Diariamente</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-300 leading-relaxed">Use o botão <strong className="text-emerald-600 font-medium">+ Nova Transação</strong> para registrar receitas ou despesas assim que elas ocorrerem.</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100/80 hover:shadow-md transition-shadow">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 font-bold mb-4 text-sm">
               4
             </span>
-            <h3 className="font-semibold text-slate-900 mb-2">Analise Relatórios</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">Veja gráficos detalhados para entender para onde seu dinheiro está indo e onde você pode poupar.</p>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Analise Relatórios</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-300 leading-relaxed">Veja gráficos detalhados para entender para onde seu dinheiro está indo e onde você pode poupar.</p>
           </div>
         </div>
       </section>
@@ -99,7 +99,7 @@ export function HelpMenu() {
       <section className="space-y-6">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
           <HelpCircle className="w-6 h-6 text-emerald-600" />
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Perguntas Frequentes (FAQ)</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Perguntas Frequentes (FAQ)</h2>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100/80 divide-y divide-slate-100 overflow-hidden">
@@ -123,7 +123,7 @@ export function HelpMenu() {
                 )}
               </button>
               {openFaq[index] && (
-                <div className="px-5 pb-5 pt-1 text-sm text-slate-500 leading-relaxed bg-slate-50/30">
+                <div className="px-5 pb-5 pt-1 text-sm text-slate-500 dark:text-slate-300 leading-relaxed bg-slate-50/30 dark:bg-slate-800/60">
                   {item.answer}
                 </div>
               )}
@@ -139,16 +139,16 @@ export function HelpMenu() {
         <section className="space-y-6">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <Keyboard className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Atalhos de Teclado</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Atalhos de Teclado</h2>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100/80 space-y-4">
-            <p className="text-sm text-slate-500">Agilize sua navegação diária utilizando os atalhos abaixo:</p>
+            <p className="text-sm text-slate-500 dark:text-slate-300">Agilize sua navegação diária utilizando os atalhos abaixo:</p>
             <div className="space-y-3">
               {shortcuts.map((shortcut, index) => (
                 <div key={index} className="flex items-center justify-between py-1.5">
-                  <span className="text-sm text-slate-600">{shortcut.desc}</span>
-                  <kbd className="px-2.5 py-1 text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-200 rounded-md shadow-sm">
+                  <span className="text-sm text-slate-600 dark:text-slate-300">{shortcut.desc}</span>
+                  <kbd className="px-2.5 py-1 text-xs font-semibold text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md shadow-sm">
                     {shortcut.key}
                   </kbd>
                 </div>
@@ -161,7 +161,7 @@ export function HelpMenu() {
         <section className="space-y-6">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <MessageSquare className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Suporte e Feedback</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Suporte e Feedback</h2>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
@@ -171,8 +171,8 @@ export function HelpMenu() {
                 <FileText className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900">Sugerir Melhorias</h3>
-                <p className="text-sm text-slate-500 mt-1 leading-relaxed">Sentiu falta de algum recurso ou tem ideias para deixar o app ainda melhor? Envie para nós!</p>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Sugerir Melhorias</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-300 mt-1 leading-relaxed">Sentiu falta de algum recurso ou tem ideias para deixar o app ainda melhor? Envie para nós!</p>
                 <a href="mailto:feedback@financeiropro.com" className="inline-block mt-3 text-sm font-semibold text-emerald-600 hover:text-emerald-700">
                   Enviar sugestão →
                 </a>
@@ -185,8 +185,8 @@ export function HelpMenu() {
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900">Reportar Bug</h3>
-                <p className="text-sm text-slate-500 mt-1 leading-relaxed">Se alguma coisa não está funcionando como deveria, nos avise para corrigirmos o quanto antes.</p>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Reportar Bug</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-300 mt-1 leading-relaxed">Se alguma coisa não está funcionando como deveria, nos avise para corrigirmos o quanto antes.</p>
                 <a href="mailto:suporte@financeiropro.com" className="inline-block mt-3 text-sm font-semibold text-emerald-600 hover:text-emerald-700">
                   Abrir chamado →
                 </a>
