@@ -1,10 +1,12 @@
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 #nullable disable
 
 namespace Financeiro.Infrastructure.Migrations;
 
+[Migration("20260903120000_AddUserPreferences")]
 public partial class AddUserPreferences : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
