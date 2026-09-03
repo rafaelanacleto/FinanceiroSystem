@@ -4,6 +4,7 @@ using Financeiro.Application.Transactions.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Financeiro.Domain.Entities;
 
 namespace Financeiro.Api.Controllers;
 
@@ -103,6 +104,34 @@ public class AccountsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("savings-goal")]
+    public async Task<IActionResult> GetSavingsGoal()
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var goal = await _mediator.Send(new GetSavingsGoalQuery(userId.Value));
+        return Ok(new { monthlySavingsGoal = goal });
+    }
+
+    [HttpPut("savings-goal")]
+    public async Task<IActionResult> UpdateSavingsGoal([FromBody] UpdateSavingsGoalRequest request)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+        if (request.MonthlySavingsGoal <= 0) return BadRequest("A meta de economia deve ser maior que zero.");
+
+        var goal = await _mediator.Send(new UpdateSavingsGoalCommand(userId.Value, request.MonthlySavingsGoal));
+        return Ok(new { monthlySavingsGoal = goal });
+    }
+
+    private Guid? GetUserId()
+    {
+        var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
+        return Guid.TryParse(claim, out var userId) ? userId : null;
+    }
+
     [HttpGet("evolution")]
     public async Task<IActionResult> GetEvolution([FromQuery] int month, [FromQuery] int year)
     {
@@ -133,3 +162,5 @@ public class AccountsController : ControllerBase
 
 
 }
+
+public record UpdateSavingsGoalRequest(decimal MonthlySavingsGoal);

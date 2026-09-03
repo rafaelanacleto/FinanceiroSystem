@@ -14,6 +14,7 @@ import { FinancialTrends } from './components/FinancialTrends';
 import { EvolutionChart } from './components/EvolutionChart';
 import { NotificationCenter } from './components/NotificationCenter';
 import { LoginForm } from './components/LoginForm';
+import { SavingsGoalSettings } from './components/SavingsGoalSettings';
 
 type Page = 'dashboard' | 'relatorios' | 'configuracoes' | 'perfil' | 'ajuda';
 type ThemeMode = 'light' | 'dark';
@@ -31,6 +32,7 @@ export function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [savingsGoalVersion, setSavingsGoalVersion] = useState(0);
 
   const userName = user?.user_metadata?.full_name || user?.email || "Usuário";
 
@@ -204,7 +206,7 @@ export function App() {
 
             {/* NOVA COLUNA TESTE */}
             <div className="lg:col-span-5 flex flex-col">
-              <FinancialTrends month={selectedMonth} year={selectedYear} />
+              <FinancialTrends key={savingsGoalVersion} month={selectedMonth} year={selectedYear} />
             </div>
 
             <div className='lg:col-span-7'>
@@ -234,7 +236,7 @@ export function App() {
           <section className="max-w-3xl">
             <div className="mb-6">
               <h2 className="text-3xl font-black text-slate-800 tracking-tight">Configurações</h2>
-              <p className="text-slate-500 font-medium mt-1">Personalize a aparência do sistema.</p>
+              <p className="text-slate-500 font-medium mt-1">Personalize sua experiência financeira.</p>
             </div>
 
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8 space-y-6">
@@ -268,6 +270,10 @@ export function App() {
                   <p className="text-xs text-slate-500 mt-1">Menos brilho para uso noturno.</p>
                 </button>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <SavingsGoalSettings onSaved={() => setSavingsGoalVersion((version) => version + 1)} />
             </div>
           </section>
         )}

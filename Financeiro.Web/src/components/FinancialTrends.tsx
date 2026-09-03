@@ -1,23 +1,29 @@
+import { useEffect, useState } from 'react';
+import api, { type SavingsGoal } from '../services/api';
+import { SavingsGoalCard } from './SavingsGoalCard';
+
 interface FinancialTrendsProps {
   month: number;
   year: number;
 }
 
 export function FinancialTrends({ month, year }: FinancialTrendsProps) {
-  // Simulando dados que viriam do seu backend/contexto baseado no mês/ano
   const essentialPercentage = 62; 
   const superfluousPercentage = 38; 
-  
-  const savingsGoal = {
-    current: 350,
-    target: 5000,
-    percentage: 7, 
-  };
+  const [savingsGoal, setSavingsGoal] = useState<SavingsGoal>({ current: 0, target: 5000, percentage: 0 });
+  const [savingsGoalLoading, setSavingsGoalLoading] = useState(true);
 
   const comparisonWithLastMonth = {
     isHigher: false,
     percentageDiff: 4.2,
   };
+
+  useEffect(() => {
+    api.get(`/Accounts/summary?month=${month}&year=${year}`)
+      .then((response) => setSavingsGoal(response.data.savingsGoal))
+      .catch((error) => console.error('Erro ao buscar meta de economia:', error))
+      .finally(() => setSavingsGoalLoading(false));
+  }, [month, year]);
 
   return (
     <div className="space-y-6 mt-6">
@@ -73,32 +79,7 @@ export function FinancialTrends({ month, year }: FinancialTrendsProps) {
       </div>
 
       {/* 2. CARD DE META DE ECONOMIA */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <h4 className="text-sm font-black text-slate-800 tracking-tight uppercase">
-              Meta de Economia
-            </h4>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Objetivo para o mês {month}
-            </p>
-          </div>
-          <span className="text-xl font-black text-emerald-600">
-            {savingsGoal.percentage}%
-          </span>
-        </div>
-
-        <div className="w-full h-2.5 bg-slate-50 border border-slate-100 rounded-full overflow-hidden mb-3">
-          <div 
-            className="bg-emerald-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-emerald-200" 
-            style={{ width: `${savingsGoal.percentage}%` }}
-          />
-        </div>
-
-        <p className="text-xs font-semibold text-slate-500">
-          Você economizou <span className="text-emerald-600 font-bold">{savingsGoal.percentage}%</span> da sua meta este mês.
-        </p>
-      </div>
+      <SavingsGoalCard month={month} savingsGoal={savingsGoal} loading={savingsGoalLoading} />
 
     </div>
   );

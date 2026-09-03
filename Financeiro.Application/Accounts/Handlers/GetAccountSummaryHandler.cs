@@ -22,13 +22,26 @@ public class GetAccountSummaryHandler : IRequestHandler<GetAccountSummaryQuery, 
             .FirstOrDefaultAsync(a => a.UserId == request.UserId, cancellationToken);
 
         if (account == null)
-            return new AccountSummaryDto(0, 0, 0, []);
+        {
+            return new AccountSummaryDto(
+                0,
+                0,
+                0,
+                [],
+                new SavingsGoalDto(0, UserPreference.DefaultMonthlySavingsGoal, 0));
+        }
+
+        var savingsGoal = await _context.UserPreferences
+            .AsNoTracking()
+            .Where(p => p.UserId == request.UserId)
+            .Select(p => (decimal?)p.MonthlySavingsGoal)
+            .SingleOrDefaultAsync(cancellationToken) ?? UserPreference.DefaultMonthlySavingsGoal;
 
         var transactions = await _context.Transactions
             .AsNoTracking()
             .Where(t => t.AccountId == account.Id &&
-                        t.CreatedAt.Month == request.Month &&
-                        t.CreatedAt.Year == request.Year)
+                        t.TransactionDate.Month == request.Month &&
+                        t.TransactionDate.Year == request.Year)
             .ToListAsync(cancellationToken);
 
         var income = transactions
@@ -51,19 +64,27 @@ public class GetAccountSummaryHandler : IRequestHandler<GetAccountSummaryQuery, 
         var annualIncome = await _context.Transactions
             .AsNoTracking()
             .Where(t => t.AccountId == account.Id &&
-                        t.CreatedAt.Year == request.Year &&
+                        t.TransactionDate.Year == request.Year &&
                         t.Type == TransactionType.Income)
             .SumAsync(t => t.Amount, cancellationToken);
 
         var annualExpenses = await _context.Transactions
             .AsNoTracking()
             .Where(t => t.AccountId == account.Id &&
-                        t.CreatedAt.Year == request.Year &&
+                        t.TransactionDate.Year == request.Year &&
                         t.Type == TransactionType.Expense)
             .SumAsync(t => t.Amount, cancellationToken);
 
         var annualBalance = annualIncome - annualExpenses;
 
-        return new AccountSummaryDto(income, expenses, annualBalance, categoryExpenses);
+        var currentSavings = income - expenses;
+        var percentage = savingsGoal > 0 ? currentSavings / savingsGoal * 100 : 0;
+
+        return new AccountSummaryDto(
+            income,
+            expenses,
+            annualBalance,
+            categoryExpenses,
+            new SavingsGoalDto(currentSavings, savingsGoal, percentage));
     }
 }

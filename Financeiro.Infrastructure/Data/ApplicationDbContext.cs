@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Transaction> Transactions => Set<Transaction>();
 
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +23,14 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Transaction>()
             .Property(t => t.Amount)
             .HasPrecision(18, 2);
+
+        modelBuilder.Entity<UserPreference>()
+            .Property(p => p.MonthlySavingsGoal)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<UserPreference>()
+            .HasIndex(p => p.UserId)
+            .IsUnique();
 
         base.OnModelCreating(modelBuilder);
     }
