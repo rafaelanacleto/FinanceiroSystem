@@ -8,7 +8,7 @@ public record TransactionDto(
     string Category,
     decimal Amount,
     int Type,
-    DateTime CreatedAt
+    DateTime TransactionDate
 );
 
 public record GetAccountTransactionsQuery(

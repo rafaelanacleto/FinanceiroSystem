@@ -7,6 +7,16 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
+function formatTransactionDate(transaction: any) {
+  const dateValue = transaction.transactionDate
+    ?? transaction.TransactionDate
+    ?? transaction.createdAt
+    ?? transaction.CreatedAt;
+  const date = new Date(dateValue);
+
+  return Number.isNaN(date.getTime()) ? '-' : date.toLocaleDateString('pt-BR');
+}
+
 interface ListProps {
   month: number;
   year: number;
@@ -88,7 +98,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
       Categoria: t.category,
       Tipo: t.type === 0 ? 'Receita' : 'Despesa',
       Valor: t.amount,
-      Data: new Date(t.createdAt).toLocaleDateString('pt-BR')
+      Data: formatTransactionDate(t)
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -145,7 +155,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
       t.category,
       t.type === 0 ? 'Receita' : 'Despesa',
       t.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-      new Date(t.createdAt).toLocaleDateString('pt-BR')
+      formatTransactionDate(t)
     ]);
 
     autoTable(doc, {
@@ -269,7 +279,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
                 <div className="min-w-0 flex-1">
                   <p className="font-black text-slate-700 break-words leading-tight">{transaction.description}</p>
                   <p className="mt-1 text-[10px] font-black text-slate-400 uppercase tracking-wider break-words">{transaction.category}</p>
-                  <p className="mt-2 text-xs font-bold text-slate-400">{new Date(transaction.createdAt).toLocaleDateString('pt-BR')}</p>
+                  <p className="mt-2 text-xs font-bold text-slate-400">{formatTransactionDate(transaction)}</p>
                 </div>
                 <p className={`shrink-0 text-right font-black text-sm ${transaction.type === 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                   {transaction.type === 0 ? '+' : '-'} {transaction.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
@@ -323,7 +333,7 @@ export function TransactionList({ month, year, onEdit }: ListProps) {
                   <div className="relative flex items-center justify-center h-full">
                     {/* Data (visível por padrão) */}
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter group-hover:opacity-0 transition-opacity">
-                      {new Date(t.createdAt).toLocaleDateString('pt-BR')}
+                      {formatTransactionDate(t)}
                     </span>
 
                     {/* Botões (visíveis no hover) */}

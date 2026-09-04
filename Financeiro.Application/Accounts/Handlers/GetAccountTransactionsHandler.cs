@@ -33,18 +33,18 @@ public class GetAccountTransactionsHandler : IRequestHandler<GetAccountTransacti
             var endDate = startDate.AddMonths(1);
 
             transactionsQuery = transactionsQuery.Where(t =>
-                t.CreatedAt >= startDate && t.CreatedAt < endDate);
+                t.TransactionDate >= startDate && t.TransactionDate < endDate);
         }
 
         return await transactionsQuery
-            .OrderByDescending(t => t.CreatedAt)
+            .OrderByDescending(t => t.TransactionDate)
             .Select(t => new TransactionDto(
                 t.Id,
                 t.Description,
                 t.Category,
                 t.Amount,
                 (int)t.Type,
-                t.CreatedAt
+                t.TransactionDate
             ))
             .ToListAsync(cancellationToken);
     }
