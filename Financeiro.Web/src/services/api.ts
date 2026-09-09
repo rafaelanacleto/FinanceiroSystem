@@ -11,6 +11,16 @@ export interface SavingsGoal {
   percentage: number;
 }
 
+export interface SpendingProfile {
+  essentialTotal: number;
+  superfluousTotal: number;
+  essentialPercentage: number;
+  superfluousPercentage: number;
+  hasPreviousMonthData: boolean;
+  percentageDiff: number | null;
+  isHigher: boolean | null;
+}
+
 export async function getSavingsGoal(): Promise<number> {
   const response = await api.get<{ monthlySavingsGoal: number }>('/Accounts/savings-goal');
   return response.data.monthlySavingsGoal;

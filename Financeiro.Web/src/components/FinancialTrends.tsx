@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api, { type SavingsGoal } from '../services/api';
+import api, { type SavingsGoal, type SpendingProfile } from '../services/api';
 import { SavingsGoalCard } from './SavingsGoalCard';
 
 interface FinancialTrendsProps {
@@ -8,22 +8,23 @@ interface FinancialTrendsProps {
 }
 
 export function FinancialTrends({ month, year }: FinancialTrendsProps) {
-  const essentialPercentage = 62; 
-  const superfluousPercentage = 38; 
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal>({ current: 0, target: 5000, percentage: 0 });
-  const [savingsGoalLoading, setSavingsGoalLoading] = useState(true);
-
-  const comparisonWithLastMonth = {
-    isHigher: false,
-    percentageDiff: 4.2,
-  };
+  const [spendingProfile, setSpendingProfile] = useState<SpendingProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     api.get(`/Accounts/summary?month=${month}&year=${year}`)
-      .then((response) => setSavingsGoal(response.data.savingsGoal))
+      .then((response) => {
+        setSavingsGoal(response.data.savingsGoal);
+        setSpendingProfile(response.data.spendingProfile);
+      })
       .catch((error) => console.error('Erro ao buscar meta de economia:', error))
-      .finally(() => setSavingsGoalLoading(false));
+      .finally(() => setLoading(false));
   }, [month, year]);
+
+  const essentialPercentage = spendingProfile?.essentialPercentage ?? 0;
+  const superfluousPercentage = spendingProfile?.superfluousPercentage ?? 0;
 
   return (
     <div className="space-y-6 mt-6">
@@ -35,51 +36,58 @@ export function FinancialTrends({ month, year }: FinancialTrendsProps) {
             Perfil de Gastos ({month}/{year})
           </h4>
           
-          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors ${
-            comparisonWithLastMonth.isHigher 
-              ? 'bg-rose-50 text-rose-700 border border-rose-100' 
-              : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-          }`}>
-            <span className="text-sm leading-none">
-              {comparisonWithLastMonth.isHigher ? '↑' : '↓'}
-            </span>
-            <span>
-              {comparisonWithLastMonth.percentageDiff}% {comparisonWithLastMonth.isHigher ? 'acima' : 'menor'} que mês anterior
-            </span>
-          </div>
+          {spendingProfile?.hasPreviousMonthData && spendingProfile.percentageDiff !== null && (
+            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+              spendingProfile.isHigher
+                ? 'bg-rose-50 text-rose-700 border border-rose-100' 
+                : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+            }`}>
+              <span className="text-sm leading-none">
+                {spendingProfile.isHigher ? '↑' : '↓'}
+              </span>
+              <span>
+                {spendingProfile.percentageDiff.toFixed(1)}% {spendingProfile.isHigher ? 'acima' : 'menor'} que mês anterior
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="space-y-3">
-          <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex">
-            <div 
-              className="bg-slate-800 h-full transition-all duration-500" 
-              style={{ width: `${essentialPercentage}%` }}
-              title={`Essencial: ${essentialPercentage}%`}
-            />
-            <div 
-              className="bg-amber-500 h-full transition-all duration-500" 
-              style={{ width: `${superfluousPercentage}%` }}
-              title={`Supérfluo: ${superfluousPercentage}%`}
-            />
-          </div>
 
-          <div className="flex items-center justify-between text-xs font-bold">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-slate-800 rounded-full" />
-              <span className="text-slate-500">Essencial</span>
-              <span className="text-slate-800">{essentialPercentage}%</span>
+        {loading ? (
+          <div className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+        ) : (
+          <div className="space-y-3">
+            <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex">
+              <div 
+                className="bg-slate-800 h-full transition-all duration-500" 
+                style={{ width: `${essentialPercentage}%` }}
+                title={`Essencial: ${essentialPercentage.toFixed(1)}%`}
+              />
+              <div 
+                className="bg-amber-500 h-full transition-all duration-500" 
+                style={{ width: `${superfluousPercentage}%` }}
+                title={`Supérfluo: ${superfluousPercentage.toFixed(1)}%`}
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />
-              <span className="text-slate-500">Supérfluo</span>
-              <span className="text-slate-800">{superfluousPercentage}%</span>
+
+            <div className="flex items-center justify-between text-xs font-bold">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-slate-800 rounded-full" />
+                <span className="text-slate-500">Essencial</span>
+                <span className="text-slate-800">{essentialPercentage.toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />
+                <span className="text-slate-500">Supérfluo</span>
+                <span className="text-slate-800">{superfluousPercentage.toFixed(1)}%</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 2. CARD DE META DE ECONOMIA */}
-      <SavingsGoalCard month={month} savingsGoal={savingsGoal} loading={savingsGoalLoading} />
+      <SavingsGoalCard month={month} savingsGoal={savingsGoal} loading={loading} />
 
     </div>
   );

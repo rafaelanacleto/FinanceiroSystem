@@ -80,11 +80,52 @@ public class GetAccountSummaryHandler : IRequestHandler<GetAccountSummaryQuery, 
         var currentSavings = income - expenses;
         var percentage = savingsGoal > 0 ? currentSavings / savingsGoal * 100 : 0;
 
+        var essentialTotal = transactions
+            .Where(t => t.Type == TransactionType.Expense && SpendingCategoryClassifier.IsEssential(t.Category))
+            .Sum(t => Math.Abs(t.Amount));
+
+        var superfluousTotal = expenses - essentialTotal;
+
+        var essentialPercentage = expenses > 0 ? essentialTotal / expenses * 100 : 0;
+        var superfluousPercentage = expenses > 0 ? superfluousTotal / expenses * 100 : 0;
+
+        var previousMonthDate = new DateTime(request.Year, request.Month, 1).AddMonths(-1);
+
+        var previousMonthExpenses = await _context.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == account.Id &&
+                        t.TransactionDate.Month == previousMonthDate.Month &&
+                        t.TransactionDate.Year == previousMonthDate.Year &&
+                        t.Type == TransactionType.Expense)
+            .Select(t => t.Amount)
+            .ToListAsync(cancellationToken);
+
+        var hasPreviousMonthData = previousMonthExpenses.Count > 0;
+        var previousExpensesTotal = previousMonthExpenses.Sum();
+
+        decimal? percentageDiff = null;
+        bool? isHigher = null;
+        if (hasPreviousMonthData && previousExpensesTotal > 0)
+        {
+            percentageDiff = Math.Abs((expenses - previousExpensesTotal) / previousExpensesTotal * 100);
+            isHigher = expenses > previousExpensesTotal;
+        }
+
+        var spendingProfile = new SpendingProfileDto(
+            essentialTotal,
+            superfluousTotal,
+            essentialPercentage,
+            superfluousPercentage,
+            hasPreviousMonthData,
+            percentageDiff,
+            isHigher);
+
         return new AccountSummaryDto(
             income,
             expenses,
             annualBalance,
             categoryExpenses,
-            new SavingsGoalDto(currentSavings, savingsGoal, percentage));
+            new SavingsGoalDto(currentSavings, savingsGoal, percentage),
+            spendingProfile);
     }
 }
