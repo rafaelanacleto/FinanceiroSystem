@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
-import { Bell, BellRing, Check, Info, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Bell, BellRing, Check, Info, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
 
 interface Notification {
   id: string;
@@ -46,6 +46,7 @@ export function NotificationCenter() {
   }, []);
 
   const unreadNotifications = notifications.filter((n) => !n.isRead);
+  const readNotifications = notifications.filter((n) => n.isRead);
   const displayedNotifications = activeTab === 'all' ? notifications : unreadNotifications;
 
   const markAsRead = async (id: string) => {
@@ -67,6 +68,16 @@ export function NotificationCenter() {
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch (error) {
       console.error('Erro ao marcar todas como lidas:', error);
+    }
+  };
+
+  const deleteReadNotifications = async () => {
+    if (readNotifications.length === 0) return;
+    try {
+      await api.delete('/notifications/read');
+      setNotifications((prev) => prev.filter((n) => !n.isRead));
+    } catch (error) {
+      console.error('Erro ao apagar notificações lidas:', error);
     }
   };
 
@@ -142,14 +153,24 @@ export function NotificationCenter() {
                 </span>
               )}
             </h3>
-            {unreadNotifications.length > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                Ler todas
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {unreadNotifications.length > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  Ler todas
+                </button>
+              )}
+              {readNotifications.length > 0 && (
+                <button
+                  onClick={deleteReadNotifications}
+                  className="text-xs font-bold text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Apagar lidas
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Navigation Tabs */}

@@ -46,5 +46,19 @@ namespace Financeiro.Api.Controllers
             await _mediator.Send(command);
             return Ok();
         }
+
+        [HttpDelete("read")]
+        public async Task<IActionResult> DeleteReadNotifications()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
+
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return BadRequest("ID de usuário inválido.");
+
+            var command = new DeleteReadNotificationsCommand(userId);
+            await _mediator.Send(command);
+            return Ok();
+        }
     }
 }
